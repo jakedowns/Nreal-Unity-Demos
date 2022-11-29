@@ -9,14 +9,18 @@ Moreover anywhere there is a Share... or Open With... moment for video files, if
 
 #### Short-Term
 
-- [] Proof-of-concept get mpv rendering to a surface in Unity
+- [x] set up repo
+
+- [ ] import unity base project
+
+- [ ] Proof-of-concept get mpv rendering to a surface in Unity
 	(Base off of NRSDK\Demos\RGBCamera-Capture.unity (it has an example Unity Video player surface)
 
-- [] mock up virtual controller with an "input lock" toggle that requies a double-tap to bring the controls back. so you can put phone in pocket while viewing
+- [ ] mock up virtual controller with an "input lock" toggle that requies a double-tap to bring the controls back. so you can put phone in pocket while viewing
 
-- [] Compare MPV and VLC codec support, maybe it makes more sense to base this on [VLC Android](https://github.com/videolan/vlc-android)
+- [ ] Compare MPV and VLC codec support, maybe it makes more sense to base this on [VLC Android](https://github.com/videolan/vlc-android)
 
-- [] add control to toggle SBS and over-under video format playback
+- [ ] add control to toggle SBS and over-under video format playback
 
 #### Mid-Term
 
@@ -24,8 +28,8 @@ Moreover anywhere there is a Share... or Open With... moment for video files, if
 
 #### Long-Term
 
-- [] ability to pin player anywhere around you (facing you)
-- [] ability to pin player against surfaces
+- [ ] ability to pin player anywhere around you (facing you)
+- [ ] ability to pin player against surfaces
 
 
 MPV Feature Overview:
