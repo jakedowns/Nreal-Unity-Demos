@@ -24,7 +24,7 @@ Moreover anywhere there is a Share... or Open With... moment for video files, if
 
 #### Mid-Term
 
-- [] toggle for tracking mode (6dof, 3dof, 0dof, 0dof stablized)
+- [ ] toggle for tracking mode (6dof, 3dof, 0dof, 0dof stablized)
 
 #### Long-Term
 
