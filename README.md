@@ -1,9 +1,9 @@
 # MPV-Android-Nreal
 A Unity Android App wrapper around the MPV player, enabling SBS and OU 3D Stereo video playback of local files AND files served over Google Drive or other Network Storage Servers
 
-# NOTE
-If you use Jellyfin Server on your PC and Jellyfin android app, you should be able to set MPV-Android-Nreal as the default external player 
-Moreover anywhere there is a Share... or Open With... moment for video files, if you point them to this app, it will Launch this XR viewer
+> NOTE: If you use Jellyfin Server on your PC and Jellyfin android app, you should be able to set MPV-Android-Nreal as the default external player 
+Moreover anywhere there is a Share... or Open With... moment for video files, if you point them to this app, it will (ideally) Launch this XR viewer
+You _may_ have to load the nebula app first each time, which would be a bummer, but maybe someday that won't be a hard requirement to enter XR mode
 
 ### TODOs
 
