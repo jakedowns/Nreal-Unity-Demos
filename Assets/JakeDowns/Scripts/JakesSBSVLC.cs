@@ -11,7 +11,16 @@ public class JakesSBSVLC : MonoBehaviour
     const int seekTimeDelta = 5000;
     Texture2D tex = null;
     bool playing;
-    
+
+    [SerializeField]
+    public GameObject leftEye;
+
+    [SerializeField]
+    public GameObject rightEye;
+
+    Renderer m_lRenderer;
+    Renderer m_rRenderer;
+
     /*float Yaw;
     float Pitch;
     float Roll;*/
@@ -31,6 +40,9 @@ public class JakesSBSVLC : MonoBehaviour
 
         Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
         _libVLC.Log += (s, e) => UnityEngine.Debug.Log(e.FormattedLog); // enable this for logs in the editor
+
+        m_lRenderer = leftEye.GetComponent<Renderer>();
+        m_rRenderer = rightEye.GetComponent<Renderer>();
 
         PlayPause();
     }
@@ -120,7 +132,9 @@ public class JakesSBSVLC : MonoBehaviour
                     false,
                     true,
                     texptr);
-                GetComponent<Renderer>().material.mainTexture = tex;
+                //GetComponent<Renderer>().material.mainTexture = tex;
+                m_lRenderer.material.mainTexture = tex;
+                m_rRenderer.material.mainTexture = tex;
             }
         }
         else if (tex != null)
