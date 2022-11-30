@@ -1,23 +1,20 @@
-# MPV-Android-Nreal
-A Unity Android App wrapper around the MPV player, enabling SBS and OU 3D Stereo video playback of local files AND files served over Google Drive or other Network Storage Servers
+# Nreal Unity Demos
 
-> NOTE: If you use Jellyfin Server on your PC and Jellyfin android app, you should be able to set MPV-Android-Nreal as the default external player 
+
+Goal 1: a simple VLC-based video player, enabling SBS and OU 3D Stereo video playback of local files AND files served over Google Drive or other Network Storage Servers
+
+> NOTE: If you use Jellyfin Server on your PC and Jellyfin android app, you should be able to set NrealVideoPlayer as the default external player 
 Moreover anywhere there is a Share... or Open With... moment for video files, if you point them to this app, it will (ideally) Launch this XR viewer
 You _may_ have to load the nebula app first each time, which would be a bummer, but maybe someday that won't be a hard requirement to enter XR mode
 
-### TODOs
+### Updates
 
-#### Short-Term
+> 11/29/22
+>
+> Found [VLC Unity Plugin](https://code.videolan.org/videolan/vlc-unity) Project. Opting to use this instead of MPV
 
-- [x] set up repo
 
-- [x] import unity base project
-
-11/29/22
-
-Found [VLC Unity Plugin](https://code.videolan.org/videolan/vlc-unity) Project 
-
-### MVP Todo:
+### MVP Todos:
 
 - [x] get VLC unity plugin loading
 
@@ -33,12 +30,18 @@ Found [VLC Unity Plugin](https://code.videolan.org/videolan/vlc-unity) Project
 
 ---
 
-- [ ] Proof-of-concept get mpv rendering to a surface in Unity
-	(Base off of NRSDK\Demos\RGBCamera-Capture.unity (it has an example Unity Video player surface)
+#### Short-Term
+
+- [x] set up repo
+
+- [x] import unity base project
+
+- [x] ~Proof-of-concept get mpv rendering to a surface in Unity
+	(Base off of NRSDK\Demos\RGBCamera-Capture.unity (it has an example Unity Video player surface)~ Did it using VLC for Unity plugin instead
 
 - [ ] mock up virtual controller with an "input lock" toggle that requies a double-tap to bring the controls back. so you can put phone in pocket while viewing
 
-- [ ] Compare MPV and VLC codec support, maybe it makes more sense to base this on [VLC Android](https://github.com/videolan/vlc-android)
+- [x] Compare MPV and VLC codec support, maybe it makes more sense to base this on [VLC Android](https://github.com/videolan/vlc-android) **going with VLC**
 
 - [ ] add control to toggle SBS and over-under video format playback
 
