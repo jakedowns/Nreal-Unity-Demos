@@ -1,31 +1,35 @@
 # MPV-Android-Nreal
 A Unity Android App wrapper around the MPV player, enabling SBS and OU 3D Stereo video playback of local files AND files served over Google Drive or other Network Storage Servers
 
-# NOTE
-If you use Jellyfin Server on your PC and Jellyfin android app, you should be able to set MPV-Android-Nreal as the default external player 
-Moreover anywhere there is a Share... or Open With... moment for video files, if you point them to this app, it will Launch this XR viewer
+> NOTE: If you use Jellyfin Server on your PC and Jellyfin android app, you should be able to set MPV-Android-Nreal as the default external player 
+Moreover anywhere there is a Share... or Open With... moment for video files, if you point them to this app, it will (ideally) Launch this XR viewer
+You _may_ have to load the nebula app first each time, which would be a bummer, but maybe someday that won't be a hard requirement to enter XR mode
 
 ### TODOs
 
 #### Short-Term
 
-- [] Proof-of-concept get mpv rendering to a surface in Unity
+- [x] set up repo
+
+- [ ] import unity base project
+
+- [ ] Proof-of-concept get mpv rendering to a surface in Unity
 	(Base off of NRSDK\Demos\RGBCamera-Capture.unity (it has an example Unity Video player surface)
 
-- [] mock up virtual controller with an "input lock" toggle that requies a double-tap to bring the controls back. so you can put phone in pocket while viewing
+- [ ] mock up virtual controller with an "input lock" toggle that requies a double-tap to bring the controls back. so you can put phone in pocket while viewing
 
-- [] Compare MPV and VLC codec support, maybe it makes more sense to base this on [VLC Android](https://github.com/videolan/vlc-android)
+- [ ] Compare MPV and VLC codec support, maybe it makes more sense to base this on [VLC Android](https://github.com/videolan/vlc-android)
 
-- [] add control to toggle SBS and over-under video format playback
+- [ ] add control to toggle SBS and over-under video format playback
 
 #### Mid-Term
 
-- [] toggle for tracking mode (6dof, 3dof, 0dof, 0dof stablized)
+- [ ] toggle for tracking mode (6dof, 3dof, 0dof, 0dof stablized)
 
 #### Long-Term
 
-- [] ability to pin player anywhere around you (facing you)
-- [] ability to pin player against surfaces
+- [ ] ability to pin player anywhere around you (facing you)
+- [ ] ability to pin player against surfaces
 
 
 MPV Feature Overview:
