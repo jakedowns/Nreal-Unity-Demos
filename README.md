@@ -11,7 +11,27 @@ You _may_ have to load the nebula app first each time, which would be a bummer, 
 
 - [x] set up repo
 
-- [ ] import unity base project
+- [x] import unity base project
+
+11/29/22
+
+Found [VLC Unity Plugin](https://code.videolan.org/videolan/vlc-unity) Project 
+
+### MVP Todo:
+
+- [x] get VLC unity plugin loading
+
+- [ ] Test MKV support
+
+- [ ] Set up shader to render half of sbs output to one eye, and the other half to the other eye
+
+- [ ] Add on-phone file picker moment for choosing a local file to play
+
+- [ ] basic playback controls
+
+- [ ] basic mode-switching
+
+---
 
 - [ ] Proof-of-concept get mpv rendering to a surface in Unity
 	(Base off of NRSDK\Demos\RGBCamera-Capture.unity (it has an example Unity Video player surface)
