@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/JakeDowns/MVP_001.unity
-    guid: a0a2879f49a13bb4da8425c940f69755
+    path: Assets/JakeDowns/Scenes/MVP_002 - SBS Test.unity
+    guid: b086cec284c7832438aa6c6aa7656481
   m_configObjects: {}
