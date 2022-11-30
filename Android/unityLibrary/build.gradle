@@ -1,0 +1,47 @@
+apply plugin: 'com.android.library'
+
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation(name: 'nrunityandroidpermission', ext:'aar')
+    implementation(name: 'nrvirtualcontroller', ext:'aar')
+    implementation(name: 'nr_api', ext:'aar')
+
+}
+
+android {
+    compileSdkVersion 31
+    buildToolsVersion '30.0.3'
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    defaultConfig {
+        minSdkVersion 26
+        targetSdkVersion 31
+        ndk {
+            abiFilters 'armeabi-v7a'
+        }
+        consumerProguardFiles 'proguard-unity.txt'
+    }
+    packagingOptions {
+        jniLibs {
+            keepDebugSymbols += ['*/armeabi-v7a/*.so']
+        }
+    }
+
+
+    androidResources {
+        ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        noCompress '[\'.unity3d\', \'.ress\', \'.resource\', \'.obb\', \'.bundle\', \'.unityexp\'] + unityStreamingAssets.tokenize(\', \')'
+    }
+    lint {
+        abortOnError false
+    }
+    namespace 'com.unity3d.player'
+}
+
+
+
