@@ -71,9 +71,9 @@ public class JakesSBSVLC : MonoBehaviour
                 // to your computer (to avoid network requests for smoother navigation)
                 // and adjust the Uri to the local path
                 // var media = new Media(new Uri("https://streams.videolan.org/streams/360/eagle_360.mp4"));
-                var media = new Media(new Uri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"));
+                //var media = new Media(new Uri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"));
                 
-                //var media = new Media(new Uri("https://jakedowns.com/media/sbs.mp4"));
+                var media = new Media(new Uri("https://jakedowns.com/media/sbs2.mp4"));
                 
                 Task.Run(async () => 
                 {
