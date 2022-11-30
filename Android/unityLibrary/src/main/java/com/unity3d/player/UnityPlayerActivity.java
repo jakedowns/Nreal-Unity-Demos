@@ -151,6 +151,7 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
     // Force event injection by overriding dispatchKeyEvent().
     @Override public boolean dispatchKeyEvent(KeyEvent event)
     {
+        /** @SuppressWarnings("deprecation") */
         if (event.getAction() == KeyEvent.ACTION_MULTIPLE)
             return mUnityPlayer.injectEvent(event);
         return super.dispatchKeyEvent(event);
