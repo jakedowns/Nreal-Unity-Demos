@@ -51,7 +51,9 @@ public class JakesSBSVLC : MonoBehaviour
     {
         // _mediaPlayer?.Dispose(); 
         // _mediaPlayer = null;
-        GetComponent<Renderer>().material.mainTexture = null;
+        //GetComponent<Renderer>().material.mainTexture = null;
+        m_lRenderer.material.mainTexture = null;
+        m_rRenderer.material.mainTexture = null;
         tex = null;
         
         _mediaPlayer?.Stop();
