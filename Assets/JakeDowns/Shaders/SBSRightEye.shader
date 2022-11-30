@@ -53,7 +53,7 @@ Shader "JakeDowns/SBSRightEye"
             {
                 float2 coord = i.uv;
                 // adjust coord.x to sample just the right half of the texture
-                coord.x = (coord.x * 2.0) - 0.5;
+                coord.x = (coord.x * 0.5) + 0.5;
             
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, coord.xy);
