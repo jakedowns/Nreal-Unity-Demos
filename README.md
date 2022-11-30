@@ -13,6 +13,13 @@ You _may_ have to load the nebula app first each time, which would be a bummer, 
 >
 > Found [VLC Unity Plugin](https://code.videolan.org/videolan/vlc-unity) Project. Opting to use this instead of MPV
 
+**Bonus Goal:** how thin of a unity layer can we get?
+
+> really, there's so many helpful things in the NRSDK, it kind of makes sense to just use Unity. I don't really want to deal with the custom glue code and setting up Activities and Android Layout Views for the Phone vs the Virtual display. It would be fun at some point to see if I could get a Unity-less or almost-Unity-less demo set up, but someone will probably beat me to that.
+
+**Q: why make a video player if Nreal is releasing an official one soon?** 
+
+> **A:** I'm mostly doing this for fun / dipping my toes into Android & Unity development and publishing. Seemed like a nice, straight-forward path to start with. Before I venture off into more exploratory areas.
 
 ### MVP Todos:
 
