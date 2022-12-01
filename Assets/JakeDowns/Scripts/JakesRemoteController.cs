@@ -7,13 +7,13 @@ public class JakesRemoteController : MonoBehaviour
     bool _menu_visible = false;
     
     GameObject _menuPanel = null;
-    GameObject _trigger = null;
+    GameObject _og_menu = null;
     
     // Start is called before the first frame update
     void Start()
     {
-        _menuPanel = GameObject.Find("MySubMenu");
-        _trigger = GameObject.Find("Buttons/MyTrigger");
+        _menuPanel = GameObject.Find("MyControlPanel");
+        _og_menu = GameObject.Find("BaseControllerPanel/Buttons");
         HideMenu();
     }
 
@@ -27,14 +27,14 @@ public class JakesRemoteController : MonoBehaviour
     {
         _menu_visible = true;
         _menuPanel.SetActive(true);
-        _trigger.SetActive(false);
+        _og_menu.SetActive(false);
     }
 
     void HideMenu()
     {
         _menu_visible = false;
         _menuPanel.SetActive(false);
-        _trigger.SetActive(true);
+        _og_menu.SetActive(true);
     }
 
     public void ToggleMenu()

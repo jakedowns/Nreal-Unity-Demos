@@ -35,7 +35,7 @@ public class VLCPlayerExample : MonoBehaviour
 
 	public bool playOnAwake = true; //Open path and Play during Awake
 
-	public bool logToConsole = false; //Log function calls and LibVLC logs to Unity console
+	public bool logToConsole = true; //Log function calls and LibVLC logs to Unity console
 
 	//Unity Awake, OnDestroy, and Update functions
 	#region unity
