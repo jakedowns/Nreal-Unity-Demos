@@ -1,5 +1,6 @@
-# Nreal Unity Demos
+# Nreal Unity Demos 001: Simple 3D Video Player
 
+![image](https://user-images.githubusercontent.com/1683122/205008687-1d3cd009-47a9-411b-bfc7-e8c15baebe10.png)
 
 Goal 1: a simple VLC-based video player, enabling SBS and OU 3D Stereo video playback of local files AND files served over Google Drive or other Network Storage Servers
 
