@@ -2,19 +2,36 @@
 using System;
 using System.Threading.Tasks;
 using LibVLCSharp;
-using NRKernal;
+//using NRKernal;
 using System.Collections.Generic;
-using UnityEngine.Device;
-using UnityEngine.UI;
+//using UnityEngine.Device;
+//using UnityEngine.UI;
 using Application = UnityEngine.Device.Application;
+//using static JakesSBSVLC;
+//using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class JakesSBSVLC : MonoBehaviour
 {
+    [SerializeField]
+    public enum VideoMode 
+    {
+        Mono,
+        SBSHalf,
+        SBSFull,
+        TB
+    }
+
+
     LibVLC libVLC;
     public MediaPlayer mediaPlayer;
     const int seekTimeDelta = 5000;
     //Texture2D tex = null;
     bool playing = false;
+
+    bool _flipStereo = false;
+
+    [SerializeField]
+    public VideoMode _videoMode = VideoMode.Mono;// 2d by default
 
     [SerializeField]
     public GameObject leftEye;
@@ -24,6 +41,12 @@ public class JakesSBSVLC : MonoBehaviour
 
     Renderer m_lRenderer;
     Renderer m_rRenderer;
+
+    Material m_lMaterial;
+    Material m_rMaterial;
+    public Material m_monoMaterial;
+    public Material m_leftEyeTBMaterial;
+    public Material m_rightEyeTBMaterial;
 
     Texture2D _vlcTexture = null; //This is the texture libVLC writes to directly. It's private.
     public RenderTexture texture = null; //We copy it into this texture which we actually use in unity.
@@ -53,6 +76,7 @@ public class JakesSBSVLC : MonoBehaviour
     #region unity
     void Awake()
     {
+        
         //Setup LibVLC
         if (libVLC == null)
             CreateLibVLC();
@@ -66,9 +90,14 @@ public class JakesSBSVLC : MonoBehaviour
         m_lRenderer = leftEye.GetComponent<Renderer>();
         m_rRenderer = rightEye.GetComponent<Renderer>();
 
+        m_lMaterial = m_lRenderer.material;
+        m_rMaterial = m_rRenderer.material;
+
         //Automatically flip on android
         if (automaticallyFlipOnAndroid && UnityEngine.Application.platform == RuntimePlatform.Android)
             flipTextureY = !flipTextureY;
+
+        SetVideoModeMono();
 
         //Setup Media Player
         CreateMediaPlayer();
@@ -240,6 +269,11 @@ public class JakesSBSVLC : MonoBehaviour
         var trimmedPath = path.Trim(new char[] { '"' });//Windows likes to copy paths with quotes but Uri does not like to open them
         mediaPlayer.Media = new Media(new Uri(trimmedPath));
         Play();
+    }
+
+    public void OpenExternal()
+    {
+        // TODO: Prompt user for path
     }
 
     public void Play()
@@ -423,7 +457,7 @@ public class JakesSBSVLC : MonoBehaviour
         libVLC?.Dispose();
         libVLC = null;
         
-        Log("VLCPlayerExample DestroyMediaPlayer");
+        Log("JakesSBSVLC DestroyMediaPlayer");
         mediaPlayer?.Stop();
         mediaPlayer?.Dispose();
         mediaPlayer = null;
@@ -465,6 +499,77 @@ public class JakesSBSVLC : MonoBehaviour
             tracks.Add(tracklist[i]);
         }
         return tracks;
+    }
+
+    public void ToggleFlipStereo()
+    {
+        _flipStereo = !_flipStereo;
+        SetVideoMode(_videoMode);
+    }
+
+    public void SetVideoMode(VideoMode mode)
+    {
+        _videoMode = mode;
+        if (mode is VideoMode.SBSHalf or VideoMode.SBSFull)
+        {
+            m_lRenderer.material = _flipStereo ? m_rMaterial : m_lMaterial;
+            m_rRenderer.material = _flipStereo ? m_lMaterial : m_rMaterial;
+            leftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
+            rightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
+        }
+        else if (mode is VideoMode.Mono)
+        {
+            m_lRenderer.material = m_monoMaterial;
+            m_rRenderer.material = m_monoMaterial;
+            leftEye.layer = LayerMask.NameToLayer("Default");
+            rightEye.layer = LayerMask.NameToLayer("Default");
+        }
+        else if (mode is VideoMode.TB)
+        {
+            // TODO: new TB materials and shaders
+            // & add support for flipStereo
+            m_lRenderer.material = m_leftEyeTBMaterial;
+            m_rRenderer.material = m_rightEyeTBMaterial;
+            leftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
+            rightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
+        }
+
+        if (m_lRenderer != null)
+            m_lRenderer.material.mainTexture = texture;
+        if (m_rRenderer != null)
+            m_rRenderer.material.mainTexture = texture;
+    }
+
+    // https://answers.unity.com/questions/1549639/enum-as-a-function-param-in-a-button-onclick.html?page=2&pageSize=5&sort=votes
+
+    public void SetVideoModeMono() => SetVideoMode(VideoMode.Mono);
+    public void SetVideoModeSBSHalf() => SetVideoMode(VideoMode.SBSHalf);
+    public void SetVideoModeSBSFull() => SetVideoMode(VideoMode.SBSFull);
+    public void SetVideoModeTB() => SetVideoMode(VideoMode.TB);
+
+    public void promptUserFilePicker()
+    {
+#if UNITY_ANDROID
+        // Use MIMEs on Android
+        string[] fileTypes = new string[] { "video/*" };
+#else
+		// Use UTIs on iOS
+		string[] fileTypes = new string[] { "public.movie" };
+#endif
+
+        // Pick image(s) and/or video(s)
+        NativeFilePicker.Permission permission = NativeFilePicker.PickFile((path) =>
+        {
+            if (path == null)
+                Debug.Log("Operation cancelled");
+            else
+            {
+                Debug.Log("Picked file: " + path);
+                Open(path);
+            }
+        }, fileTypes);
+
+        Debug.Log("Permission result: " + permission);
     }
 
     void Log(object message)

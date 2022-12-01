@@ -21,6 +21,7 @@ public class JakesVLCPlayerExampleGui : MonoBehaviour
 	public Button pauseButton;
 	public Button stopButton;
 	public Button pathButton;
+	public Button fileButton;
 	public Button tracksButton;
 	public Button volumeButton;
 	public GameObject pathGroup; //Group containing pathInputField and openButton
@@ -104,9 +105,13 @@ public class JakesVLCPlayerExampleGui : MonoBehaviour
 			if(ToggleElement(pathGroup))
 				pathInputField.Select();
 		});
-		tracksButton.onClick.AddListener(() => { ToggleElement(tracksButtonsGroup); SetupTrackButtons(); });
+        fileButton.onClick.AddListener(() =>
+        {
+			vlcPlayer.promptUserFilePicker();
+        });
+        tracksButton.onClick.AddListener(() => { ToggleElement(tracksButtonsGroup); SetupTrackButtons(); });
 		volumeButton.onClick.AddListener(() => { ToggleElement(volumeBar.gameObject); });
-		openButton.onClick.AddListener(() => { vlcPlayer.Open(pathInputField.text); });
+		openButton.onClick.AddListener(() => { ToggleElement(pathGroup); vlcPlayer.Open(pathInputField.text); });
 
 		UpdatePlayPauseButton(vlcPlayer.playOnAwake);
 
