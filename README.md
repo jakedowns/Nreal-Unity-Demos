@@ -27,13 +27,13 @@ You _may_ have to load the nebula app first each time, which would be a bummer, 
 
 - [ ] Test MKV support
 
-- [ ] Set up shader to render half of sbs output to one eye, and the other half to the other eye
+- [x] Set up shader to render half of sbs output to one eye, and the other half to the other eye
 
 - [ ] Add on-phone file picker moment for choosing a local file to play
 
-- [ ] basic playback controls
+- [x] basic playback controls
 
-- [ ] basic mode-switching
+- [x] basic tracking mode-switching
 
 ---
 
