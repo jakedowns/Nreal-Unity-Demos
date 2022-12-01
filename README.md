@@ -8,6 +8,24 @@ Goal 1: a simple VLC-based video player, enabling SBS and OU 3D Stereo video pla
 Moreover anywhere there is a Share... or Open With... moment for video files, if you point them to this app, it will (ideally) Launch this XR viewer
 You _may_ have to load the nebula app first each time, which would be a bummer, but maybe someday that won't be a hard requirement to enter XR mode
 
+### Building
+
+i was having a hard time getting it to build in Unity directly,
+
+i ended up having to Export it to the nested Android folder
+
+each time i run "Export" i have to then delete any changes that unity makes to the manifests
+
+from there i open it in android studio and perform the build.
+
+it's kind of a pain, i just haven't been able to figure out how to solve building it directly in unity yet.
+
+The main scene is "Assets/JakeDowns/Scenes/MVP_002 - SBS Test.unity"
+
+![Unity_SkSJVaT9gc](https://user-images.githubusercontent.com/1683122/205026934-7a8e1fdf-78f1-46fa-919b-5b3be9c0c2de.png)
+
+![studio64_6oeY0ZeMBj](https://user-images.githubusercontent.com/1683122/205026956-890d6b33-e16b-4553-8704-dde989dd9827.png)
+
 ### Updates
 
 > 11/29/22
