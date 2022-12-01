@@ -6907,9 +6907,9 @@ MonoBehaviour:
   m_rightEyeTBMaterial: {fileID: 2100000, guid: c720289ec3d4fda4b8cc911b84a4269e, type: 2}
   texture: {fileID: 0}
   path: https://jakedowns.com/media/sbs2.mp4
-  flipTextureX: 1
-  flipTextureY: 1
-  automaticallyFlipOnAndroid: 0
+  flipTextureX: 0
+  flipTextureY: 0
+  automaticallyFlipOnAndroid: 1
   playOnAwake: 1
   logToConsole: 1
 --- !u!114 &1991896283
