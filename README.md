@@ -48,18 +48,24 @@ You _may_ have to load the nebula app first each time, which would be a bummer, 
 
 - [ ] mock up virtual controller with an "input lock" toggle that requies a double-tap to bring the controls back. so you can put phone in pocket while viewing
 
+- [x] add basic controls: stop, pause, play, seek, volume, source url input
+
 - [x] Compare MPV and VLC codec support, maybe it makes more sense to base this on [VLC Android](https://github.com/videolan/vlc-android) **going with VLC**
 
 - [ ] add control to toggle SBS and over-under video format playback
 
+- [ ] detect and account for half-sbs vs full-sbs
+
 #### Mid-Term
 
-- [ ] toggle for tracking mode (6dof, 3dof, 0dof, 0dof stablized)
+- [x] toggle for tracking mode (6dof, 3dof, 0dof, 0dof stablized)
 
 #### Long-Term
 
 - [ ] ability to pin player anywhere around you (facing you)
 - [ ] ability to pin player against surfaces
+- [ ] test multi audio track switching
+- [ ] test subtitles
 
 
 MPV Feature Overview:
