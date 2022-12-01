@@ -1,11 +1,30 @@
-# Nreal Unity Demos
+# Nreal Unity Demos 001: Simple 3D Video Player
 
+![image](https://user-images.githubusercontent.com/1683122/205008687-1d3cd009-47a9-411b-bfc7-e8c15baebe10.png)
 
 Goal 1: a simple VLC-based video player, enabling SBS and OU 3D Stereo video playback of local files AND files served over Google Drive or other Network Storage Servers
 
 > NOTE: If you use Jellyfin Server on your PC and Jellyfin android app, you should be able to set NrealVideoPlayer as the default external player 
 Moreover anywhere there is a Share... or Open With... moment for video files, if you point them to this app, it will (ideally) Launch this XR viewer
 You _may_ have to load the nebula app first each time, which would be a bummer, but maybe someday that won't be a hard requirement to enter XR mode
+
+### Building
+
+i was having a hard time getting it to build in Unity directly,
+
+i ended up having to Export it to the nested Android folder
+
+each time i run "Export" i have to then delete any changes that unity makes to the manifests
+
+from there i open it in android studio and perform the build.
+
+it's kind of a pain, i just haven't been able to figure out how to solve building it directly in unity yet.
+
+The main scene is "Assets/JakeDowns/Scenes/MVP_002 - SBS Test.unity"
+
+![Unity_SkSJVaT9gc](https://user-images.githubusercontent.com/1683122/205026934-7a8e1fdf-78f1-46fa-919b-5b3be9c0c2de.png)
+
+![studio64_6oeY0ZeMBj](https://user-images.githubusercontent.com/1683122/205026956-890d6b33-e16b-4553-8704-dde989dd9827.png)
 
 ### Updates
 
@@ -27,13 +46,13 @@ You _may_ have to load the nebula app first each time, which would be a bummer, 
 
 - [ ] Test MKV support
 
-- [ ] Set up shader to render half of sbs output to one eye, and the other half to the other eye
+- [x] Set up shader to render half of sbs output to one eye, and the other half to the other eye
 
 - [ ] Add on-phone file picker moment for choosing a local file to play
 
-- [ ] basic playback controls
+- [x] basic playback controls
 
-- [ ] basic mode-switching
+- [x] basic tracking mode-switching
 
 ---
 
@@ -48,18 +67,24 @@ You _may_ have to load the nebula app first each time, which would be a bummer, 
 
 - [ ] mock up virtual controller with an "input lock" toggle that requies a double-tap to bring the controls back. so you can put phone in pocket while viewing
 
+- [x] add basic controls: stop, pause, play, seek, volume, source url input
+
 - [x] Compare MPV and VLC codec support, maybe it makes more sense to base this on [VLC Android](https://github.com/videolan/vlc-android) **going with VLC**
 
 - [ ] add control to toggle SBS and over-under video format playback
 
+- [ ] detect and account for half-sbs vs full-sbs
+
 #### Mid-Term
 
-- [ ] toggle for tracking mode (6dof, 3dof, 0dof, 0dof stablized)
+- [x] toggle for tracking mode (6dof, 3dof, 0dof, 0dof stablized)
 
 #### Long-Term
 
 - [ ] ability to pin player anywhere around you (facing you)
 - [ ] ability to pin player against surfaces
+- [ ] test multi audio track switching
+- [ ] test subtitles
 
 
 MPV Feature Overview:
