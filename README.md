@@ -16,9 +16,9 @@ You _may_ have to load the nebula app first each time, which would be a bummer, 
 > - [NRSDK 1.9.5](https://developer.nreal.ai/download)
 
 **Known Issues:**
-- 1. [Android Build Fails](https://github.com/jakedowns/Nreal-Unity-Demos/issues/1) - Need to figure out a way to distribute binaries without including them in source control
-- 2. [VLC not loading youtube urls](https://code.videolan.org/videolan/vlc-unity/-/issues/168) - [Issue #2](https://github.com/jakedowns/Nreal-Unity-Demos/issues/2)
-- 3. [File picker not working](https://github.com/yasirkula/UnityNativeFilePicker/issues/31) - [Issue #3](https://github.com/jakedowns/Nreal-Unity-Demos/issues/3)
+1. [Android Build Fails](https://github.com/jakedowns/Nreal-Unity-Demos/issues/1) - Need to figure out a way to distribute binaries without including them in source control
+2. [VLC not loading youtube urls](https://code.videolan.org/videolan/vlc-unity/-/issues/168) - [Issue #2](https://github.com/jakedowns/Nreal-Unity-Demos/issues/2)
+3. [File picker not working](https://github.com/yasirkula/UnityNativeFilePicker/issues/31) - [Issue #3](https://github.com/jakedowns/Nreal-Unity-Demos/issues/3)
 
 
 i was having a hard time getting it to build in Unity directly,
