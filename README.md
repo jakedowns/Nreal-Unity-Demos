@@ -10,6 +10,16 @@ You _may_ have to load the nebula app first each time, which would be a bummer, 
 
 ### Building
 
+> NOTE: you must reimport the following packages (i'll figure out how to distrubte binaries outside of git later)
+> - [VLC for Unity (Android) Free Trial Version 0.1.6](https://videolabs.io/solutions/unity/#:~:text=more%20platform%20support.-,Free%20trial%20version,-We%20offer%20a)
+> - [Native File Picker Plugin v1.2.9](https://github.com/yasirkula/UnityNativeFilePicker)
+> - [NRSDK 1.9.5](https://developer.nreal.ai/download)
+
+**Known Issues:**
+- 1. [File picker not working](https://github.com/yasirkula/UnityNativeFilePicker/issues/31)
+- 2. [VLC not loading youtube urls](https://code.videolan.org/videolan/vlc-unity/-/issues/168)
+
+
 i was having a hard time getting it to build in Unity directly,
 
 i ended up having to Export it to the nested Android folder
