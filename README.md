@@ -2,10 +2,15 @@
 
 <img width="200" src="https://user-images.githubusercontent.com/1683122/205008687-1d3cd009-47a9-411b-bfc7-e8c15baebe10.png" />
 
-> **TIP** Install Jellyfin Server on your PC and set up your Movie Library
+> **TIP**
+> Install Jellyfin Server on your PC and set up your Movie Library
+> 
 > Then, install the Jellyfin android app and connect to the server (or use the web UI)
+> 
 > click the ... next to the movie you want to watch in 3D and click "Copy Stream URL"
+> 
 > then, open nrealDemo (will rename it soon) and paste the URL into the Input field (Click the Globe Icon, then the SMALL play icon)
+> 
 > BOOM you're streaming 3D video from your computer
 
 **Known Issues:**
