@@ -1,12 +1,23 @@
-# Nreal Unity Demos 001: Simple 3D Video Player
+# VLC3D For Nreal Air - A Simple 3D Video Player
 
-![image](https://user-images.githubusercontent.com/1683122/205008687-1d3cd009-47a9-411b-bfc7-e8c15baebe10.png)
+<img width="200" src="https://user-images.githubusercontent.com/1683122/205008687-1d3cd009-47a9-411b-bfc7-e8c15baebe10.png" />
 
-Goal 1: a simple VLC-based video player, enabling SBS and OU 3D Stereo video playback of local files AND files served over Google Drive or other Network Storage Servers
+> **TIP** Install Jellyfin Server on your PC and set up your Movie Library
+> Then, install the Jellyfin android app and connect to the server (or use the web UI)
+> click the ... next to the movie you want to watch in 3D and click "Copy Stream URL"
+> then, open nrealDemo (will rename it soon) and paste the URL into the Input field (Click the Globe Icon, then the SMALL play icon)
+> BOOM you're streaming 3D video from your computer
 
-> NOTE: If you use Jellyfin Server on your PC and Jellyfin android app, you should be able to set NrealVideoPlayer as the default external player 
-Moreover anywhere there is a Share... or Open With... moment for video files, if you point them to this app, it will (ideally) Launch this XR viewer
-You _may_ have to load the nebula app first each time, which would be a bummer, but maybe someday that won't be a hard requirement to enter XR mode
+**Known Issues:**
+1. [Android Build Fails](https://github.com/jakedowns/Nreal-Unity-Demos/issues/1) 
+     - Need to figure out a way to distribute binaries without including them in source control
+1. [VLC not loading youtube urls](https://code.videolan.org/videolan/vlc-unity/-/issues/168) - [Issue #2](https://github.com/jakedowns/Nreal-Unity-Demos/issues/2)
+1. ~~[File picker not working](https://github.com/yasirkula/UnityNativeFilePicker/issues/31) - [Issue #3](https://github.com/jakedowns/Nreal-Unity-Demos/issues/3)~~ **SOLVED**
+1. "Open In..." not wired up. The app appears in the share sheet, but I need to wire up receiving the file path
+1. The code for Over/Under || Top/Bottom videos isn't set up correctly, will fix this soon.
+1. Video is often too bright. I need to add some brightness/contrast/gamma sliders for adjustment. Coming Soon!
+1. Subtitle Support is not complete (partially implemented)
+1. Selecting Alternative Audio Tracks is not yet complete (partially implemented)
 
 ### Building
 
@@ -14,11 +25,6 @@ You _may_ have to load the nebula app first each time, which would be a bummer, 
 > - [VLC for Unity (Android) Free Trial Version 0.1.6](https://videolabs.io/solutions/unity/#:~:text=more%20platform%20support.-,Free%20trial%20version,-We%20offer%20a)
 > - [Native File Picker Plugin v1.2.9](https://github.com/yasirkula/UnityNativeFilePicker)
 > - [NRSDK 1.9.5](https://developer.nreal.ai/download)
-
-**Known Issues:**
-1. [Android Build Fails](https://github.com/jakedowns/Nreal-Unity-Demos/issues/1) - Need to figure out a way to distribute binaries without including them in source control
-2. [VLC not loading youtube urls](https://code.videolan.org/videolan/vlc-unity/-/issues/168) - [Issue #2](https://github.com/jakedowns/Nreal-Unity-Demos/issues/2)
-3. [File picker not working](https://github.com/yasirkula/UnityNativeFilePicker/issues/31) - [Issue #3](https://github.com/jakedowns/Nreal-Unity-Demos/issues/3)
 
 
 i was having a hard time getting it to build in Unity directly,
@@ -55,11 +61,11 @@ The main scene is "Assets/JakeDowns/Scenes/MVP_002 - SBS Test.unity"
 
 - [x] get VLC unity plugin loading
 
-- [ ] Test MKV support
+- [x] Test MKV support
 
 - [x] Set up shader to render half of sbs output to one eye, and the other half to the other eye
 
-- [ ] Add on-phone file picker moment for choosing a local file to play
+- [x] Add on-phone file picker moment for choosing a local file to play
 
 - [x] basic playback controls
 
@@ -76,13 +82,13 @@ The main scene is "Assets/JakeDowns/Scenes/MVP_002 - SBS Test.unity"
 - [x] ~Proof-of-concept get mpv rendering to a surface in Unity
 	(Base off of NRSDK\Demos\RGBCamera-Capture.unity (it has an example Unity Video player surface)~ Did it using VLC for Unity plugin instead
 
-- [ ] mock up virtual controller with an "input lock" toggle that requies a double-tap to bring the controls back. so you can put phone in pocket while viewing
+- [x] mock up virtual controller with an "input lock" toggle that requies a double-tap to bring the controls back. so you can put phone in pocket while viewing
 
 - [x] add basic controls: stop, pause, play, seek, volume, source url input
 
 - [x] Compare MPV and VLC codec support, maybe it makes more sense to base this on [VLC Android](https://github.com/videolan/vlc-android) **going with VLC**
 
-- [ ] add control to toggle SBS and over-under video format playback
+- [x] add control to toggle SBS and over-under video format playback
 
 - [ ] detect and account for half-sbs vs full-sbs
 
@@ -98,7 +104,6 @@ The main scene is "Assets/JakeDowns/Scenes/MVP_002 - SBS Test.unity"
 - [ ] test subtitles
 
 
-MPV Feature Overview:
 (nice to haves / feature parity)
 
 - Player UI
