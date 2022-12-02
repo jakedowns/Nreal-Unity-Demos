@@ -9,6 +9,10 @@
 - [x] Pairs Great with Jellyfin or other Home Media Servers
 - [x] Support for SBS Stereo 3D playback on Nreal Air & Nreal Light
 
+### Coming Soon
+- [ ] Subtitle Support
+- [ ] Alternate Audio Track Selection
+
 ### How to use with Jellyfin
 > Install Jellyfin Server on your PC and set up your Movie Library
 > 
