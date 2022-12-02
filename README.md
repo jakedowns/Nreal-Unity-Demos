@@ -1,6 +1,6 @@
 # VLC3D For Nreal Air - A Simple 3D Video Player
 
-<img width="200" src="https://user-images.githubusercontent.com/1683122/205008687-1d3cd009-47a9-411b-bfc7-e8c15baebe10.png" />
+<img width="200" src="https://user-images.githubusercontent.com/1683122/205247852-1e877cd4-386b-4f51-a880-633a44189288.png" />
 
 ### [Download the Latest APK here](https://github.com/jakedowns/Nreal-Unity-Demos/releases)
 
@@ -36,6 +36,7 @@
 1. Video is often too bright. I need to add some brightness/contrast/gamma sliders for adjustment. Coming Soon!
 1. Subtitle Support is not complete (partially implemented)
 1. Selecting Alternative Audio Tracks is not yet complete (partially implemented)
+1. the "lock screen" icon is supposed to be setting screen brightness to 0.1, it also could be Pausing controller tracking. looking into that...
 
 ### Building
 
