@@ -2,7 +2,14 @@
 
 <img width="200" src="https://user-images.githubusercontent.com/1683122/205008687-1d3cd009-47a9-411b-bfc7-e8c15baebe10.png" />
 
-> **TIP**
+### Features
+- [x] VLC-based, so it supports pretty much every video/audio codec VLC does
+- [x] URL input: point player to a video file and it will play it. (Youtube URL support currently broken) 
+- [x] File Picker: load files locally from your phone, or over google drive
+- [x] Pairs Great with Jellyfin or other Home Media Servers
+- [x] Support for SBS Stereo 3D playback on Nreal Air & Nreal Light
+
+### How to use with Jellyfin
 > Install Jellyfin Server on your PC and set up your Movie Library
 > 
 > Then, install the Jellyfin android app and connect to the server (or use the web UI)
@@ -30,7 +37,6 @@
 > - [VLC for Unity (Android) Free Trial Version 0.1.6](https://videolabs.io/solutions/unity/#:~:text=more%20platform%20support.-,Free%20trial%20version,-We%20offer%20a)
 > - [Native File Picker Plugin v1.2.9](https://github.com/yasirkula/UnityNativeFilePicker)
 > - [NRSDK 1.9.5](https://developer.nreal.ai/download)
-
 
 i was having a hard time getting it to build in Unity directly,
 
