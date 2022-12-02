@@ -2,6 +2,8 @@
 
 <img width="200" src="https://user-images.githubusercontent.com/1683122/205008687-1d3cd009-47a9-411b-bfc7-e8c15baebe10.png" />
 
+### [Download the Latest APK here](https://github.com/jakedowns/Nreal-Unity-Demos/releases)
+
 ### Features
 - [x] VLC-based, so it supports pretty much every video/audio codec VLC does
 - [x] URL input: point player to a video file and it will play it. (Youtube URL support currently broken) 
