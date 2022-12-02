@@ -28,6 +28,13 @@ public class JakesSBSVLC : MonoBehaviour
     //Texture2D tex = null;
     bool playing = false;
 
+    GameObject _hideWhenLocked;
+    GameObject _menuToggleButton;
+    GameObject _logo;
+
+    bool _screenLocked = false;
+    float _brightnessOnLock = 0.0f;
+
     bool _flipStereo = false;
 
     [SerializeField]
@@ -76,7 +83,12 @@ public class JakesSBSVLC : MonoBehaviour
     #region unity
     void Awake()
     {
-        
+
+        // TODO: extract lockscreen logic into a separate script
+        _hideWhenLocked = GameObject.Find("HideWhenScreenLocked");
+        _logo = GameObject.Find("logo");
+        _menuToggleButton = GameObject.Find("MenuToggleButton");
+
         //Setup LibVLC
         if (libVLC == null)
             CreateLibVLC();
@@ -118,7 +130,7 @@ public class JakesSBSVLC : MonoBehaviour
         //Get size every frame
         uint height = 0;
         uint width = 0;
-        mediaPlayer.Size(0, ref width, ref height);
+        mediaPlayer?.Size(0, ref width, ref height);
 
         //Automatically resize output textures if size changes
         if (_vlcTexture == null || _vlcTexture.width != width || _vlcTexture.height != height)
@@ -556,7 +568,7 @@ public class JakesSBSVLC : MonoBehaviour
 		// Use UTIs on iOS
 		string[] fileTypes = new string[] { "public.movie" };
 #endif
-
+        
         // Pick image(s) and/or video(s)
         NativeFilePicker.Permission permission = NativeFilePicker.PickFile((path) =>
         {
@@ -587,6 +599,58 @@ public class JakesSBSVLC : MonoBehaviour
                 AndroidJavaObject toastObject = toastClass.CallStatic<AndroidJavaObject>("makeText", unityActivity, message, 0);
                 toastObject.Call("show");
             }));
+        }
+    }
+
+    public void OnSingleTap(string name)    
+    {
+        Debug.Log($"[SBSVLC] Single Tap Triggered {name}");
+        if (name == "LockScreenButton")
+        {
+            if (!_screenLocked)
+            {
+                ToggleScreenLock();
+            }
+        }
+    }
+
+    // we require a double-tap to unlock
+    public void OnDoubleTap(string name)
+    {
+        Debug.Log($"[SBSVLC] Double Tap Triggered {name}");
+        if (name == "LockScreenButton")
+        {
+            if (_screenLocked)
+            {
+                ToggleScreenLock();
+            }
+        }
+    }
+
+    public void ToggleScreenLock()
+    {
+        _screenLocked = !_screenLocked;
+
+        if (_screenLocked)
+        {
+            // Hide All UI except for the lock button
+            _hideWhenLocked.SetActive(false);
+            _logo.SetActive(false);
+            _menuToggleButton.SetActive(false);
+            // Lower Brightness
+            _brightnessOnLock = Screen.brightness;
+            // Set it to 0? 0.1?
+            Screen.brightness = 0;
+        }
+        else
+        {
+            // Restore Brightness
+            Screen.brightness = _brightnessOnLock;
+            
+            // Show All UI when screen is unlocked
+            _hideWhenLocked.SetActive(true);
+            _logo.SetActive(true);
+            _menuToggleButton.SetActive(true);
         }
     }
 
