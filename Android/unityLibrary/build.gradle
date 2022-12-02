@@ -3,6 +3,7 @@ apply plugin: 'com.android.library'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation(name: 'NativeFilePicker', ext:'aar')
     implementation(name: 'nrunityandroidpermission', ext:'aar')
     implementation(name: 'nrvirtualcontroller', ext:'aar')
     implementation(name: 'nr_api', ext:'aar')
@@ -24,6 +25,8 @@ android {
         ndk {
             abiFilters 'armeabi-v7a'
         }
+        versionCode 1
+        versionName '0.1'
         consumerProguardFiles 'proguard-unity.txt'
     }
     packagingOptions {
@@ -37,11 +40,25 @@ android {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         noCompress '[\'.unity3d\', \'.ress\', \'.resource\', \'.obb\', \'.bundle\', \'.unityexp\'] + unityStreamingAssets.tokenize(\', \')'
     }
+
     lint {
         abortOnError false
     }
+
+    aaptOptions {
+        noCompress = ['.unity3d', '.ress', '.resource', '.obb', '.bundle', '.unityexp'] + unityStreamingAssets.tokenize(', ')
+        ignoreAssetsPattern = "!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~"
+    }
+
+    packagingOptions {
+        doNotStrip '*/armeabi-v7a/*.so'
+    }
+
     namespace 'com.unity3d.player'
 }
 
 
+    android.sourceSets.main.java.srcDirs += [
+        'K:/Code/Nreal-Unity-Demos/Assets/NRSDK/Demos/RGBCamera/Scripts/GalleryDataProvider.java'
+    ]
 
