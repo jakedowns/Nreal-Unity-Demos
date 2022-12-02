@@ -1,6 +1,6 @@
 # VLC3D For Nreal Air - A Simple 3D Video Player
 
-<img width="200" src="https://user-images.githubusercontent.com/1683122/205247852-1e877cd4-386b-4f51-a880-633a44189288.png" />
+<img width="800" src="https://user-images.githubusercontent.com/1683122/205247852-1e877cd4-386b-4f51-a880-633a44189288.png" />
 
 ### [Download the Latest APK here](https://github.com/jakedowns/Nreal-Unity-Demos/releases)
 
