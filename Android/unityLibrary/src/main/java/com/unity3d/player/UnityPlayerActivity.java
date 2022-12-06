@@ -37,6 +37,8 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
         String cmdLine = updateUnityCommandLineArguments(getIntent().getStringExtra("unity"));
         getIntent().putExtra("unity", cmdLine);
 
+
+
         mUnityPlayer = new UnityPlayer(this, this);
         setContentView(mUnityPlayer);
         mUnityPlayer.requestFocus();
@@ -95,7 +97,7 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
     // Pause Unity
     @Override protected void onPause()
     {
-        super.onPause();
+        //super.onPause();
 
         MultiWindowSupport.saveMultiWindowMode(this);
 
@@ -156,6 +158,20 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
             return mUnityPlayer.injectEvent(event);
         return super.dispatchKeyEvent(event);
     }
+
+    // Check whether this app has android
+    // write settings permission.
+//    @RequiresApi(Build.VERSION_CODES.M)
+//    @Override public boolean hasWriteSettingsPermission() {
+//    var ret = true
+//    // Get the result from below code.
+//    ret = Settings.System.canWrite(context)
+//    return ret
+//    }
+
+    // check hasWriteSettingsPermission
+    
+    
 
     // Pass any events not handled by (unfocused) views straight to UnityPlayer
     @Override public boolean onKeyUp(int keyCode, KeyEvent event)     { return mUnityPlayer.injectEvent(event); }

@@ -9,8 +9,8 @@ android {
     buildToolsVersion '30.0.3'
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     defaultConfig {
@@ -24,6 +24,14 @@ android {
         versionName '0.1'
     }
 
+    aaptOptions {
+        noCompress = ['.unity3d', '.ress', '.resource', '.obb', '.bundle', '.unityexp'] + unityStreamingAssets.tokenize(', ')
+        ignoreAssetsPattern = "!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~"
+    }
+
+    lintOptions {
+        abortOnError false
+    }
 
     buildTypes {
         debug {
@@ -38,13 +46,10 @@ android {
             signingConfig signingConfigs.debug
         }
     }
-    packagingOptions {
-        jniLibs {
-            keepDebugSymbols += ['*/armeabi-v7a/*.so']
-            pickFirsts += ['**/libc++_shared.so']
-        }
-    }
 
+    packagingOptions {
+        doNotStrip '*/armeabi-v7a/*.so'
+    }
 
     bundle {
         language {
@@ -57,12 +62,4 @@ android {
             enableSplit = true
         }
     }
-    androidResources {
-        ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
-        noCompress '[\'.unity3d\', \'.ress\', \'.resource\', \'.obb\', \'.bundle\', \'.unityexp\'] + unityStreamingAssets.tokenize(\', \')'
-    }
-    lint {
-        abortOnError false
-    }
-    namespace 'com.jakedowns.nrealDemo'
 }

@@ -15,7 +15,7 @@ public class JakesVLCPlayerExampleGui : MonoBehaviour
 	
 	//GUI Elements
 	//public RawImage screen;
-	public AspectRatioFitter screenAspectRatioFitter;
+	//public AspectRatioFitter screenAspectRatioFitter;
 	public Slider seekBar;
 	public Button playButton;
 	public Button pauseButton;
@@ -54,6 +54,16 @@ public class JakesVLCPlayerExampleGui : MonoBehaviour
 
 	void Start()
 	{
+		if (vlcPlayer is null)
+		{
+            Debug.LogError("VLC Player not found. Please assign a JakesSBSVLC component to the vlcPlayer variable in the inspector.");
+			return;
+        }
+        if (vlcPlayer?.mediaPlayer is null)
+		{
+			Debug.LogError("VLC Player mediaPlayer not found");
+		}
+        
 		//VLC Event Handlers
 		vlcPlayer.mediaPlayer.Playing += (object sender, EventArgs e) => {
 			//Always use Try/Catch for VLC Events
@@ -151,8 +161,8 @@ public class JakesVLCPlayerExampleGui : MonoBehaviour
 	{
 		//Update screen aspect ratio. Doing this every frame is probably more than is necessary.
 
-		if(vlcPlayer.texture != null)
-			screenAspectRatioFitter.aspectRatio = (float)vlcPlayer.texture.width / (float)vlcPlayer.texture.height;
+		//if(vlcPlayer.texture != null)
+		//	screenAspectRatioFitter.aspectRatio = (float)vlcPlayer.texture.width / (float)vlcPlayer.texture.height;
 
 		UpdatePlayPauseButton(_isPlaying);
 

@@ -7,8 +7,15 @@ using System.Collections.Generic;
 //using UnityEngine.Device;
 //using UnityEngine.UI;
 using Application = UnityEngine.Device.Application;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
+using NRKernal;
 //using static JakesSBSVLC;
 //using static UnityEditor.Experimental.GraphView.GraphView;
+
+/**
+ * @TODO: change camera FOV when switching to 360 mode
+ */
+
 
 public class JakesSBSVLC : MonoBehaviour
 {
@@ -18,7 +25,11 @@ public class JakesSBSVLC : MonoBehaviour
         Mono,
         SBSHalf,
         SBSFull,
-        TB
+        TB,
+        _360_2D,
+        _180_2D,
+        _360_3D,
+        _180_3D
     }
 
 
@@ -28,9 +39,22 @@ public class JakesSBSVLC : MonoBehaviour
     //Texture2D tex = null;
     bool playing = false;
 
+    [SerializeField]
+    GameObject NRCameraRig;
+    Camera LeftCamera;
+    Camera CenterCamera;
+    Camera RightCamera;
+
     GameObject _hideWhenLocked;
     GameObject _menuToggleButton;
     GameObject _logo;
+    public GameObject _360Sphere;
+    GameObject _2DDisplaySet;
+
+    [SerializeField]
+    public UnityEngine.UI.Slider fovBar;
+
+    GameObject _cone;
 
     bool _screenLocked = false;
     float _brightnessOnLock = 0.0f;
@@ -40,14 +64,26 @@ public class JakesSBSVLC : MonoBehaviour
     [SerializeField]
     public VideoMode _videoMode = VideoMode.Mono;// 2d by default
 
+    // Flat Left
     [SerializeField]
     public GameObject leftEye;
 
+    // Flat Right
     [SerializeField]
     public GameObject rightEye;
 
+    // Sphere Left
+    [SerializeField]
+    public GameObject leftEyeSphere;
+    // Sphere Right
+    [SerializeField]
+    public GameObject rightEyeSphere;
+
     Renderer m_lRenderer;
     Renderer m_rRenderer;
+
+    Renderer m_l360Renderer;
+    Renderer m_r360Renderer;
 
     Material m_lMaterial;
     Material m_rMaterial;
@@ -55,20 +91,44 @@ public class JakesSBSVLC : MonoBehaviour
     public Material m_leftEyeTBMaterial;
     public Material m_rightEyeTBMaterial;
 
+    public Material m_leftEye360Material;
+    public Material m_rightEye360Material;
+
+    // TODO: combine 180 and 360 into 2 materials instead of 4?
+    public Material m_leftEye180Material;
+    public Material m_rightEye180Material;
+
+    public Material m_3602DSphericalMaterial;
+    public Material m_1802DSphericalMaterial;
+
+    /// <summary> The NRInput. </summary>
+    [SerializeField]
+    private NRInput m_NRInput;
+
     Texture2D _vlcTexture = null; //This is the texture libVLC writes to directly. It's private.
     public RenderTexture texture = null; //We copy it into this texture which we actually use in unity.
 
-    /*float Yaw;
+    bool _is360 = false;
+    bool _is180 = false;
+
+    float Yaw;
     float Pitch;
-    float Roll;*/
+    float Roll;
+
+    float _aspectRatio;
+    bool m_updatedARSinceOpen = false;
+
+    // TODO: support overriding the current aspect ratio
+    float _aspectRatioOverride;
 
     /// <summary> The previous position. </summary>
     private Vector2 m_PreviousPos;
 
-    /*public int fov = 120;*/
+    // TODO: add fov slider
+    int fov = 180;
 
     //public string path = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"; //Can be a web path or a local path
-    public string path = "https://jakedowns.com/media/sbs2.mp4";
+    public string path = "https://jakedowns.com/media/sbs2.mp4"; // Render a nice lil SBS and 180 and 360 video that can play when you switch modes
 
     public bool flipTextureX = false; //No particular reason you'd need this but it is sometimes useful
     public bool flipTextureY = true; //Set to false on Android, to true on Windows
@@ -83,15 +143,40 @@ public class JakesSBSVLC : MonoBehaviour
     #region unity
     void Awake()
     {
+        //Setup LibVLC
+        if (libVLC == null)
+            CreateLibVLC();
+
+        //Setup Media Player
+        CreateMediaPlayer();
+
+        Debug.Log($"[VLC] LibVLC version and architecture {libVLC.Changeset}");
+        Debug.Log($"[VLC] LibVLCSharp version {typeof(LibVLC).Assembly.GetName().Version}");
+
+        LeftCamera = NRCameraRig.transform.Find("LeftCamera").GetComponent<Camera>();
+        CenterCamera = NRCameraRig.transform.Find("CenterCamera").GetComponent<Camera>();
+        RightCamera = NRCameraRig.transform.Find("RightCamera").GetComponent<Camera>();
+        OnFOVSliderUpdated();
+
+        _cone = GameObject.Find("CONE_PARENT");
+
+        //_360Sphere = GameObject.Find("SphereDisplay");
+        /*if (_360Sphere is null)
+            Debug.LogError("SphereDisplay not found");
+        else
+            _360Sphere.SetActive(false);*/
+
+        //leftEyeSphere = _360Sphere.transform.Find("LeftEye").gameObject;
+        //rightEyeSphere = _360Sphere.transform.Find("RightEye").gameObject;
+        m_l360Renderer = leftEyeSphere.GetComponent<Renderer>();
+        m_r360Renderer = rightEyeSphere.GetComponent<Renderer>();
+
+        _2DDisplaySet = GameObject.Find("SBSDisplay/DisplaySet");
 
         // TODO: extract lockscreen logic into a separate script
         _hideWhenLocked = GameObject.Find("HideWhenScreenLocked");
         _logo = GameObject.Find("logo");
         _menuToggleButton = GameObject.Find("MenuToggleButton");
-
-        //Setup LibVLC
-        if (libVLC == null)
-            CreateLibVLC();
 
         //Setup Screen
         /*if (screen == null)
@@ -102,6 +187,7 @@ public class JakesSBSVLC : MonoBehaviour
         m_lRenderer = leftEye.GetComponent<Renderer>();
         m_rRenderer = rightEye.GetComponent<Renderer>();
 
+        // read material reference
         m_lMaterial = m_lRenderer.material;
         m_rMaterial = m_rRenderer.material;
 
@@ -110,9 +196,6 @@ public class JakesSBSVLC : MonoBehaviour
             flipTextureY = !flipTextureY;
 
         SetVideoModeMono();
-
-        //Setup Media Player
-        CreateMediaPlayer();
 
         //Play On Start
         if (playOnAwake)
@@ -158,8 +241,59 @@ public class JakesSBSVLC : MonoBehaviour
     {
         DestroyMediaPlayer();
     }
-    
 
+    public void Demo3602D()
+    {
+        Open("https://streams.videolan.org/streams/360/eagle_360.mp4");
+        SetVideoMode3602D();
+    }
+
+    public void ToggleSphere()
+    {
+        _360Sphere.SetActive(!_360Sphere.activeSelf);
+    }
+
+    public void ToggleSBSDisplay()
+    {
+        _2DDisplaySet.SetActive(!_2DDisplaySet.activeSelf);
+    }
+
+    public void OnFOVSliderUpdated()
+    {
+        fov = (int)fovBar.value;
+        
+        if (_is360)
+        {
+            LeftCamera.fieldOfView = fov;
+            CenterCamera.fieldOfView = fov;
+            RightCamera.fieldOfView = fov;
+            Do360Navigation();
+        }
+    }
+
+    public void SetVideoMode1802D()
+    {
+        SetVideoMode(VideoMode._180_2D);
+    }
+
+    public void SetVideoMode3602D()
+    {
+        SetVideoMode(VideoMode._360_2D);
+    }
+
+    public void SetVideoMode1803D()
+    {
+        SetVideoMode(VideoMode._180_3D);
+    }
+
+    public void SetVideoMode3603D()
+    {
+        SetVideoMode(VideoMode._360_3D);
+    }
+
+
+
+    /*
     public void PlayPause()
     {
         Debug.Log ("[VLC] Toggling Play Pause !");
@@ -183,21 +317,30 @@ public class JakesSBSVLC : MonoBehaviour
                 // var media = new Media(new Uri("https://streams.videolan.org/streams/360/eagle_360.mp4"));
                 //var media = new Media(new Uri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"));
                 
-                var media = new Media(new Uri("https://jakedowns.com/media/sbs2.mp4"));
+                var media = new Media(new Uri(path));
                 
-                Task.Run(async () => 
+                Task.Run(async () =>
                 {
                     var result = await media.ParseAsync(libVLC, MediaParseOptions.ParseNetwork);
                     var trackList = media.TrackList(TrackType.Video);
-                    var is360 = trackList[0].Data.Video.Projection == VideoProjection.Equirectangular;
+                    _is360 = trackList[0].Data.Video.Projection == VideoProjection.Equirectangular;
 
                     Debug.Log($"projection {trackList[0].Data.Video.Projection}");
-                    
-                    
-                    if(is360)
+
+
+                    if (_is360)
+                    {
                         Debug.Log("The video is a 360 video");
+                        _360Sphere.SetActive(true);
+                        _2DDisplaySet.SetActive(false);
+                    }
+
                     else
+                    {
                         Debug.Log("The video was not identified as a 360 video by VLC, make sure it is properly tagged");
+                        _360Sphere.SetActive(false);
+                        _2DDisplaySet.SetActive(true);
+                    }
 
                     trackList.Dispose();
                 });
@@ -207,7 +350,7 @@ public class JakesSBSVLC : MonoBehaviour
 
             mediaPlayer.Play();
         }
-    }
+    } */
 
     /*void Update()
     {
@@ -245,8 +388,15 @@ public class JakesSBSVLC : MonoBehaviour
         }
     }*/
 
-    /*void OnGUI()
+    VideoMode[] _SphericalModes = new VideoMode[4] { VideoMode._180_2D, VideoMode._360_2D, VideoMode._180_3D, VideoMode._360_3D };
+
+    void OnGUI()
     {
+        if(Array.IndexOf(_SphericalModes, _videoMode) == -1)
+        {
+            return;
+        }
+
         if (NRInput.GetButtonDown(ControllerButton.TRIGGER))
         {
             m_PreviousPos = NRInput.GetTouch();
@@ -254,14 +404,54 @@ public class JakesSBSVLC : MonoBehaviour
         else if (NRInput.GetButton(ControllerButton.TRIGGER))
         {
             //UpdateScroll();
+            Do360Navigation();
         }
         else if (NRInput.GetButtonUp(ControllerButton.TRIGGER))
         {
-            m_PreviousPos = Vector2.zero;
+            //m_PreviousPos = Vector2.zero;
         }
 
-        *//*Do360Navigation();*//*
-    }*/
+        
+    }
+
+    void Do360Navigation()
+    {
+        var range = Math.Max(UnityEngine.Screen.width, UnityEngine.Screen.height);
+
+        Yaw = mediaPlayer.Viewpoint.Yaw;
+        Pitch = mediaPlayer.Viewpoint.Pitch;
+        Roll = mediaPlayer.Viewpoint.Roll;
+
+
+        Vector2 deltaMove = NRInput.GetTouch() - m_PreviousPos;
+        m_PreviousPos = NRInput.GetTouch();
+
+        float absX = Mathf.Abs(deltaMove.x);
+        float absY = Mathf.Abs(deltaMove.y);
+
+        float eighty_or_delta_x = absX > 0 ? absX * 10000 : 80;
+        float eighty_or_delta_y = absY > 0 ? absY * 10000 : 80;
+
+        Debug.Log($"80x {eighty_or_delta_x} 80y {eighty_or_delta_y}");
+
+
+        if (Input.GetKey(KeyCode.RightArrow) || deltaMove.x > 0)
+        {
+            mediaPlayer.UpdateViewpoint(Yaw + (float)(eighty_or_delta_x * +40 / range), Pitch, Roll, fov);
+        }
+        else if (Input.GetKey(KeyCode.LeftArrow) || deltaMove.x < 0)
+        {
+            mediaPlayer.UpdateViewpoint(Yaw - (float)(eighty_or_delta_x * +40 / range), Pitch, Roll, fov);
+        }
+        else if (Input.GetKey(KeyCode.DownArrow) || deltaMove.y < 0)
+        {
+            mediaPlayer.UpdateViewpoint(Yaw, Pitch + (float)(eighty_or_delta_y * +20 / range), Roll, fov);
+        }
+        else if (Input.GetKey(KeyCode.UpArrow) || deltaMove.y > 0)
+        {
+            mediaPlayer.UpdateViewpoint(Yaw, Pitch - (float)(eighty_or_delta_y * +20 / range), Roll, fov);
+        }
+    }
 
     //Public functions that expose VLC MediaPlayer functions in a Unity-friendly way. You may want to add more of these.
     #region vlc
@@ -275,11 +465,38 @@ public class JakesSBSVLC : MonoBehaviour
     public void Open()
     {
         Log("VLCPlayerExample Open");
-        if (mediaPlayer.Media != null)
+        if (mediaPlayer?.Media != null)
             mediaPlayer.Media.Dispose();
 
         var trimmedPath = path.Trim(new char[] { '"' });//Windows likes to copy paths with quotes but Uri does not like to open them
         mediaPlayer.Media = new Media(new Uri(trimmedPath));
+
+        Task.Run(async () =>
+        {
+            var result = await mediaPlayer.Media.ParseAsync(libVLC, MediaParseOptions.ParseNetwork);
+            var trackList = mediaPlayer.Media.TrackList(TrackType.Video);
+            _is360 = trackList[0].Data.Video.Projection == VideoProjection.Equirectangular;
+
+            Debug.Log($"projection {trackList[0].Data.Video.Projection}");
+
+            if (_is360)
+            {
+                Debug.Log("The video is a 360 video");
+                SetVideoMode(VideoMode._360_2D);
+            }
+
+            else
+            {
+                Debug.Log("The video was not identified as a 360 video by VLC");
+                SetVideoMode(VideoMode.Mono);
+            }
+
+            trackList.Dispose();
+        });
+
+        // flag to read and store the texture aspect ratio
+        m_updatedARSinceOpen = false;
+
         Play();
     }
 
@@ -291,6 +508,8 @@ public class JakesSBSVLC : MonoBehaviour
     public void Play()
     {
         Log("VLCPlayerExample Play");
+
+        _cone?.SetActive(false); // hide cone logo
 
         mediaPlayer.Play();
     }
@@ -306,8 +525,28 @@ public class JakesSBSVLC : MonoBehaviour
         Log("VLCPlayerExample Stop");
         mediaPlayer?.Stop();
 
-        //_vlcTexture = null;
-        //texture = null;
+        // TODO: encapsulate this
+        if (m_lRenderer?.material is not null)
+            m_lRenderer.material.mainTexture = null;
+
+        if (m_rRenderer?.material is not null)
+            m_rRenderer.material.mainTexture = null;
+
+        if (m_l360Renderer?.material is not null)
+            m_l360Renderer.material.mainTexture = null;
+
+        if (m_r360Renderer?.material is not null)
+            m_r360Renderer.material.mainTexture = null;
+
+
+        // show cone
+        _cone?.SetActive(true);
+
+
+        // clear to black
+        _vlcTexture = null;
+        texture = null;
+
     }
 
     public void Seek(long timeDelta)
@@ -453,13 +692,24 @@ public class JakesSBSVLC : MonoBehaviour
             DestroyMediaPlayer();
         }
         mediaPlayer = new MediaPlayer(libVLC);
+        Log("Media Player SET!");
     }
 
     //Dispose of the MediaPlayer object. 
     void DestroyMediaPlayer()
     {
-        m_lRenderer.material.mainTexture = null;
-        m_rRenderer.material.mainTexture = null;
+        if(m_lRenderer?.material is not null)
+            m_lRenderer.material.mainTexture = null;
+
+        if(m_rRenderer?.material is not null)
+            m_rRenderer.material.mainTexture = null;
+        
+        if(m_l360Renderer is not null && m_l360Renderer?.material is not null)
+            m_l360Renderer.material.mainTexture = null;
+
+        if(m_r360Renderer is not null && m_r360Renderer?.material is not null)
+            m_r360Renderer.material.mainTexture = null;
+
         _vlcTexture = null;
 
         mediaPlayer?.Stop();
@@ -478,6 +728,10 @@ public class JakesSBSVLC : MonoBehaviour
     //Resize the output textures to the size of the video
     void ResizeOutputTextures(uint px, uint py)
     {
+        if(mediaPlayer is null)
+        {
+            return;
+        }
         var texptr = mediaPlayer.GetTexture(px, py, out bool updated);
         if (px != 0 && py != 0 && updated && texptr != IntPtr.Zero)
         {
@@ -492,10 +746,23 @@ public class JakesSBSVLC : MonoBehaviour
             _vlcTexture = Texture2D.CreateExternalTexture((int)px, (int)py, TextureFormat.RGBA32, false, true, texptr); //Make a texture of the proper size for the video to output to
             texture = new RenderTexture(_vlcTexture.width, _vlcTexture.height, 0, RenderTextureFormat.ARGB32); //Make a renderTexture the same size as vlctex
 
+            if (!m_updatedARSinceOpen)
+            {
+                m_updatedARSinceOpen = true;
+                _aspectRatio = (float)texture.width / (float)texture.height;
+                Debug.Log($"[SBSVLC] aspect ratio {_aspectRatio}");
+            }
+
             if (m_lRenderer != null)
                 m_lRenderer.material.mainTexture = texture;
             if (m_rRenderer != null)
                 m_rRenderer.material.mainTexture = texture;
+
+            if (m_l360Renderer != null)
+                m_l360Renderer.material.mainTexture = texture;
+
+            if (m_r360Renderer != null)
+                m_r360Renderer.material.mainTexture = texture;
         }
     }
 
@@ -522,34 +789,106 @@ public class JakesSBSVLC : MonoBehaviour
     public void SetVideoMode(VideoMode mode)
     {
         _videoMode = mode;
-        if (mode is VideoMode.SBSHalf or VideoMode.SBSFull)
+        Debug.Log($"[JakeDowns] set video mode {mode}");
+
+        if (Array.IndexOf(_SphericalModes, mode) > -1)
         {
-            m_lRenderer.material = _flipStereo ? m_rMaterial : m_lMaterial;
-            m_rRenderer.material = _flipStereo ? m_lMaterial : m_rMaterial;
-            leftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
-            rightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
+            // TODO: set SBS material mainTextures to null to save battery
+            Debug.Log("Trying to set Sphere to Active!");
+            _360Sphere.SetActive(true);
+            _2DDisplaySet.SetActive(false);
+
+            if(mode == VideoMode._360_2D || mode == VideoMode._180_2D)
+            {
+                // 2D
+                leftEyeSphere.SetActive(true);
+                rightEyeSphere.SetActive(false);
+                leftEyeSphere.layer = LayerMask.NameToLayer("Default");
+            }
+            else
+            {
+                // 3D
+                leftEyeSphere.SetActive(true);
+                rightEyeSphere.SetActive(true);
+                leftEyeSphere.layer = LayerMask.NameToLayer("LeftEyeOnly");
+                rightEyeSphere.layer = LayerMask.NameToLayer("RightEyeOnly");
+            }
+
+            if(mode == VideoMode._360_3D)
+            {
+                m_l360Renderer.material = m_leftEye360Material;
+                m_r360Renderer.material = m_rightEye360Material;
+                
+            }
+            else if(mode == VideoMode._360_2D)
+            {
+                m_l360Renderer.material = m_3602DSphericalMaterial;
+            }
+            else if(mode == VideoMode._180_3D)
+            {
+                m_l360Renderer.material = m_leftEye180Material;
+                m_r360Renderer.material = m_rightEye180Material;
+            }
+            else if(mode == VideoMode._180_2D)
+            {
+                m_l360Renderer.material = m_1802DSphericalMaterial;
+            }
+
+            if(mode == VideoMode._360_2D || mode == VideoMode._180_2D)
+            {
+                m_l360Renderer.material = m_3602DSphericalMaterial;
+                m_l360Renderer.material.mainTexture = texture;
+            }
+            else
+            {
+                // 3D
+                m_l360Renderer.material.mainTexture = texture;
+                m_r360Renderer.material.mainTexture = texture;
+            }
+
+            OnFOVSliderUpdated();
         }
-        else if (mode is VideoMode.Mono)
+        else
         {
-            m_lRenderer.material = m_monoMaterial;
-            m_rRenderer.material = m_monoMaterial;
-            leftEye.layer = LayerMask.NameToLayer("Default");
-            rightEye.layer = LayerMask.NameToLayer("Default");
-        }
-        else if (mode is VideoMode.TB)
-        {
-            // TODO: new TB materials and shaders
-            // & add support for flipStereo
-            m_lRenderer.material = m_leftEyeTBMaterial;
-            m_rRenderer.material = m_rightEyeTBMaterial;
-            leftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
-            rightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
+            LeftCamera.fieldOfView = 20;
+            CenterCamera.fieldOfView = 20;
+            RightCamera.fieldOfView = 20;
+            // TODO: set 360 material mainTextures to null to save battery
+            Debug.Log("setting sphere inactive");
+            _360Sphere.SetActive(false);
+            _2DDisplaySet.SetActive(true);
+            
+            if (mode is VideoMode.SBSHalf or VideoMode.SBSFull)
+            {
+                m_lRenderer.material = _flipStereo ? m_rMaterial : m_lMaterial;
+                m_rRenderer.material = _flipStereo ? m_lMaterial : m_rMaterial;
+                leftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
+                rightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
+            }
+            else if (mode is VideoMode.Mono)
+            {
+                m_lRenderer.material = m_monoMaterial;
+                m_rRenderer.material = m_monoMaterial;
+                leftEye.layer = LayerMask.NameToLayer("Default");
+                rightEye.layer = LayerMask.NameToLayer("Default");
+            }
+            else if (mode is VideoMode.TB)
+            {
+                // TODO: new TB materials and shaders
+                // & add support for flipStereo
+                m_lRenderer.material = m_leftEyeTBMaterial;
+                m_rRenderer.material = m_rightEyeTBMaterial;
+                leftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
+                rightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
+            }
+
+            if (m_lRenderer != null)
+                m_lRenderer.material.mainTexture = texture;
+            if (m_rRenderer != null)
+                m_rRenderer.material.mainTexture = texture;
         }
 
-        if (m_lRenderer != null)
-            m_lRenderer.material.mainTexture = texture;
-        if (m_rRenderer != null)
-            m_rRenderer.material.mainTexture = texture;
+        
     }
 
     // https://answers.unity.com/questions/1549639/enum-as-a-function-param-in-a-button-onclick.html?page=2&pageSize=5&sort=votes
@@ -581,8 +920,11 @@ public class JakesSBSVLC : MonoBehaviour
             }
         }, fileTypes);
 
-        _ShowAndroidToastMessage($"Permission result: {permission}");
-        Debug.Log("Permission result: " + permission);
+        if (permission is not NativeFilePicker.Permission.Granted)
+        {
+            _ShowAndroidToastMessage($"Permission result: {permission}");
+            Debug.Log("Permission result: " + permission);
+        }
     }
 
     /// <param name="message">Message string to show in the toast.</param>
@@ -639,8 +981,10 @@ public class JakesSBSVLC : MonoBehaviour
             _menuToggleButton.SetActive(false);
             // Lower Brightness
             _brightnessOnLock = Screen.brightness;
+            Debug.Log($"brightness on lock {_brightnessOnLock}");
             // Set it to 0? 0.1?
-            Screen.brightness = 0;
+            Screen.brightness = 0.1f;
+            // todo call out to service
         }
         else
         {

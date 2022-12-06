@@ -14,8 +14,6 @@ public class VLCThreeSixty : MonoBehaviour
     float Yaw;
     float Pitch;
     float Roll;
-    
-    public int fov = 120;
 
     void Awake()
     {
@@ -128,7 +126,7 @@ public class VLCThreeSixty : MonoBehaviour
         Yaw = _mediaPlayer.Viewpoint.Yaw;
         Pitch = _mediaPlayer.Viewpoint.Pitch;
         Roll = _mediaPlayer.Viewpoint.Roll;
-        
+        var fov = 80;
 
         if (Input.GetKey(KeyCode.RightArrow))
         {

@@ -26,7 +26,7 @@ namespace LibVLCSharp
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void OnBeforeSceneLoadRuntimeMethod()
         {
-            Debug.Log("UnityEngine.QualitySettings.activeColorSpace: " + PlayerColorSpace);
+          //  Debug.Log("UnityEngine.QualitySettings.activeColorSpace: " + PlayerColorSpace);
             SetColorSpace(PlayerColorSpace);
 #if UNITY_ANDROID
             GL.IssuePluginEvent(GetRenderEventFunc(), 1);

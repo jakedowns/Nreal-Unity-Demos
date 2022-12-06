@@ -23,7 +23,7 @@ public class VLCYouTubePlayback : MonoBehaviour
         _libVLC = new LibVLC(enableDebugLogs: true);
 
         Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
-        _libVLC.Log += (s, e) => UnityEngine.Debug.Log(e.FormattedLog); // enable this for logs in the editor
+        //_libVLC.Log += (s, e) => UnityEngine.Debug.Log(e.FormattedLog); // enable this for logs in the editor
 
         await StartPlayback();
     }
@@ -70,7 +70,6 @@ public class VLCYouTubePlayback : MonoBehaviour
                 // playing youtube video
                 var youtubeLink = new Media(new Uri("https://www.youtube.com/watch?v=aqz-KE-bpKQ"));
                 await youtubeLink.ParseAsync(_libVLC, MediaParseOptions.ParseNetwork);
-                Debug.Log($"[VLC] Youtube video parsed: {youtubeLink.ParsedStatus}");
                 _mediaPlayer.Media = youtubeLink.SubItems.First();
             }
 
