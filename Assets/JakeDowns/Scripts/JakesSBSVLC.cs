@@ -60,6 +60,7 @@ public class JakesSBSVLC : MonoBehaviour
 
     bool _screenLocked = false;
     int _brightnessOnLock = 0;
+    int _brightnessModeOnLock = 0;
 
     bool _flipStereo = false;
 
@@ -126,8 +127,7 @@ public class JakesSBSVLC : MonoBehaviour
     /// <summary> The previous position. </summary>
     private Vector2 m_PreviousPos;
 
-    // TODO: add fov slider
-    int fov = 180;
+    int fov = 140; // 20 for 2D 140 for spherical
 
     //public string path = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"; //Can be a web path or a local path
     public string path = "https://jakedowns.com/media/sbs2.mp4"; // Render a nice lil SBS and 180 and 360 video that can play when you switch modes
@@ -159,13 +159,7 @@ public class JakesSBSVLC : MonoBehaviour
 #if UNITY_ANDROID            
         if (!Application.isEditor)
         {
-            unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayerActivity");
-            try {
-               activity = unityPlayer?.GetStatic<AndroidJavaObject>("currentActivity");
-               context = activity?.Call<AndroidJavaObject>("getApplicationContext");
-            }catch(Exception e){
-                Debug.Log("error getting context " + e.ToString());
-            }
+            GetContext();
 
 
 
@@ -825,6 +819,8 @@ public class JakesSBSVLC : MonoBehaviour
             _360Sphere.SetActive(true);
             _2DDisplaySet.SetActive(false);
 
+            fov = 140;
+
             if(mode == VideoMode._360_2D || mode == VideoMode._180_2D)
             {
                 // 2D
@@ -1002,6 +998,20 @@ public class JakesSBSVLC : MonoBehaviour
         }
     }
 
+    void GetContext()
+    {
+        unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayerActivity");
+        try
+        {
+            activity = unityPlayer?.GetStatic<AndroidJavaObject>("currentActivity");
+            context = activity?.Call<AndroidJavaObject>("getApplicationContext");
+        }
+        catch (Exception e)
+        {
+            Debug.Log("error getting context " + e.ToString());
+        }
+    }
+
     public void ToggleScreenLock()
     {
         _screenLocked = !_screenLocked;
@@ -1018,18 +1028,31 @@ public class JakesSBSVLC : MonoBehaviour
 
 #if UNITY_ANDROID
             if (!Application.isEditor)
-            { 
-                // get int from _brightnessHelper
-                _brightnessOnLock = (int)(_brightnessHelper?.CallStatic<int>("GetBrightness"));
+            {
+                try
+                {
+                    // get int from _brightnessHelper
+                    _brightnessOnLock = (int)(_brightnessHelper?.CallStatic<int>("getBrightness"));
 
-                Debug.Log($"lockbrightness Android brightness on lock {_brightnessOnLock}");
+                    _brightnessModeOnLock = (int)(_brightnessHelper?.CallStatic<int>("getBrightnessMode"));
+
+                    Debug.Log($"lockbrightness Android brightness on lock {_brightnessOnLock}");
+                }catch(Exception e)
+                {
+                    Debug.Log("Error getting brightness " + e.ToString());
+                }
 
                 // Set it to 0? 0.1?
                 //Debug.Log($"set brightness with unity");
                 //Screen.brightness = 0.1f;
 
-                if(context is null){
+                if (context is null)
+                {
                     Debug.Log("context is null");
+                    GetContext();
+                }
+                if (context is not null)
+                {
                     // TODO: maybe try to fetch it again now?
 
                     object _args = new object[2] { context, 1 };
@@ -1037,6 +1060,7 @@ public class JakesSBSVLC : MonoBehaviour
                     // call _brightnessHelper
                     _brightnessHelper?.CallStatic("SetBrightness", _args);
                 }
+                 
 
             }
 #endif
@@ -1046,8 +1070,29 @@ public class JakesSBSVLC : MonoBehaviour
 #if UNITY_ANDROID
             if (!Application.isEditor)
             {
-                object _args = new object[2] { context, _brightnessOnLock };
-                _brightnessHelper?.CallStatic("SetBrightness", _args);
+                if (context is null)
+                {
+                    Debug.Log("context is null");
+                    GetContext();
+                }
+                if (context is not null)
+                {
+                    try
+                    {
+                        object _args = new object[2] { context, _brightnessOnLock };
+                        _brightnessHelper?.CallStatic("setBrightness", _args);
+
+                        // restore brightness mode
+                        object _args_mode = new object[2] { context, _brightnessModeOnLock };
+                        _brightnessHelper?.CallStatic("setBrightnessMode", _args_mode);
+                    }
+                    catch(Exception e)
+                    {
+                        Debug.Log("error setting brightness " + e.ToString());
+                    }
+                    
+                }
+                
             }
 #else
             // Restore Brightness
