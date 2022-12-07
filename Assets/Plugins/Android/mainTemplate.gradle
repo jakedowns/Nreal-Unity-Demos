@@ -35,6 +35,10 @@ android {
         noCompress = **BUILTIN_NOCOMPRESS** + unityStreamingAssets.tokenize(', ')
         ignoreAssetsPattern = "!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~"
     }**PACKAGING_OPTIONS**
+
+    packagingOptions {
+      pickFirst '**/libc++_shared.so'
+    }
 }**REPOSITORIES**
 **IL_CPP_BUILD_SETUP**
 **SOURCE_BUILD_SETUP**
