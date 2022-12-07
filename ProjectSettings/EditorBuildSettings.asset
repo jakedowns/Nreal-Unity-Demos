@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/JakeDowns/Scenes/MVP_002 - SBS Test.unity
+    path: Assets/JakeDowns/Scenes/VLC3D.unity
     guid: b086cec284c7832438aa6c6aa7656481
   m_configObjects: {}

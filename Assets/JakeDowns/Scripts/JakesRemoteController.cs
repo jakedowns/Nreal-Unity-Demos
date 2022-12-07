@@ -26,15 +26,15 @@ public class JakesRemoteController : MonoBehaviour
     void ShowMenu()
     {
         _menu_visible = true;
-        _menuPanel.SetActive(true);
-        _og_menu.SetActive(false);
+        _menuPanel?.SetActive(true);
+        _og_menu?.SetActive(false);
     }
 
     void HideMenu()
     {
         _menu_visible = false;
-        _menuPanel.SetActive(false);
-        _og_menu.SetActive(true);
+        _menuPanel?.SetActive(false);
+        _og_menu?.SetActive(true);
     }
 
     public void ToggleMenu()
