@@ -159,9 +159,14 @@ public class JakesSBSVLC : MonoBehaviour
 #if UNITY_ANDROID            
         if (!Application.isEditor)
         {
-            unityPlayer = new AndroidJavaClass("com.jakedowns.VLC3D.VLC3DActivity");
-            activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
-            context = activity.Call<AndroidJavaObject>("getApplicationContext");
+            unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayerActivity");
+            try {
+               activity = unityPlayer?.GetStatic<AndroidJavaObject>("currentActivity");
+               context = activity?.Call<AndroidJavaObject>("getApplicationContext");
+            }catch(Exception e){
+                Debug.Log("error getting context " + e.ToString());
+            }
+
 
 
             _brightnessHelper = new AndroidJavaClass("com.jakedowns.BrightnessHelper");
@@ -1023,10 +1028,16 @@ public class JakesSBSVLC : MonoBehaviour
                 //Debug.Log($"set brightness with unity");
                 //Screen.brightness = 0.1f;
 
-                object _args = new object[2] { context, 1 };
+                if(context is null){
+                    Debug.Log("context is null");
+                    // TODO: maybe try to fetch it again now?
 
-                // call _brightnessHelper
-                _brightnessHelper?.CallStatic("SetBrightness", _args);
+                    object _args = new object[2] { context, 1 };
+
+                    // call _brightnessHelper
+                    _brightnessHelper?.CallStatic("SetBrightness", _args);
+                }
+
             }
 #endif
         }
