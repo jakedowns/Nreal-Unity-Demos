@@ -22,7 +22,7 @@ public class VLC3DActivity extends UnityPlayerActivity {
     {
         // Instead of calling UnityPlayerActivity.onBackPressed(), this example ignores the back button event
         //super.onBackPressed();
-
+        Log.d("VLC3DActivity", "set brightness");
         BrightnessHelper.setBrightness(getApplicationContext(), 128);
     }
 
