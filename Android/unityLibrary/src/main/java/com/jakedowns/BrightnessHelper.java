@@ -20,7 +20,8 @@ public class BrightnessHelper {
         if (Settings.System.canWrite(context)) {
 
             //Write code to feature for eg. set brightness or vibrate device
-            ContentResolver cResolver = context.getContentResolver();  Settings.System.putInt(cResolver,  Settings.System.SCREEN_BRIGHTNESS,brightness);
+            ContentResolver cResolver = context.getContentResolver();
+            Settings.System.putInt(cResolver,  Settings.System.SCREEN_BRIGHTNESS,brightness);
         }
         else {
             showBrightnessPermissionDialog(context);
@@ -34,6 +35,27 @@ public class BrightnessHelper {
             return Settings.System.getInt(cResolver,  Settings.System.SCREEN_BRIGHTNESS);
         } catch (Settings.SettingNotFoundException e) {
             return 0;
+        }
+    }
+
+    public static int getBrightnessMode(Context context) {
+        ContentResolver cResolver = context.getContentResolver();
+        try {
+            return Settings.System.getInt(cResolver,  Settings.System.SCREEN_BRIGHTNESS_MODE);
+        } catch (Settings.SettingNotFoundException e) {
+            return 0;
+        }
+    }
+
+    public static void setBrightnessMode(Context context, int mode) {
+        if (Settings.System.canWrite(context)) {
+
+            ContentResolver cResolver = context.getContentResolver();
+            Settings.System.putInt(cResolver,
+                    Settings.System.SCREEN_BRIGHTNESS_MODE,mode);
+        }
+        else {
+            showBrightnessPermissionDialog(context);
         }
     }
 
