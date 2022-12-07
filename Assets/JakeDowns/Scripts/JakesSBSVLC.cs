@@ -872,9 +872,15 @@ public class JakesSBSVLC : MonoBehaviour
         }
         else
         {
-            LeftCamera.fieldOfView = 20;
-            CenterCamera.fieldOfView = 20;
-            RightCamera.fieldOfView = 20;
+            if(LeftCamera is not null)
+                LeftCamera.fieldOfView = 20;
+
+            if (CenterCamera is not null)
+                CenterCamera.fieldOfView = 20;
+            
+            if (RightCamera is not null)
+                RightCamera.fieldOfView = 20;
+            
             // TODO: set 360 material mainTextures to null to save battery
             Debug.Log("setting sphere inactive");
             _360Sphere.SetActive(false);
