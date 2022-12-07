@@ -15,7 +15,7 @@ import android.provider.Settings;
 
 public class BrightnessHelper {
 
-    public static void  setBrightness(Context context, int brightness){
+    public static void setBrightness(Context context, int brightness){
 
         if (Settings.System.canWrite(context)) {
 
