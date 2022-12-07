@@ -80,6 +80,8 @@ namespace NRKernal
                             throw new NRDisplayModeMismatchError(result, module_tag + "Display mode mismatch, as MRSpace mode is needed!");
                         case NativeResult.UnSupportedHandtrackingCalculation:
                             throw new NRUnSupportedHandtrackingCalculationError(result, module_tag + "Not support hand tracking calculation!");
+                        case NativeResult.JakesCustomResult:
+                            throw new NRJakesCustomResultError(result, module_tag + "JakesCustomResult");
                         default:
                             break;
                     }

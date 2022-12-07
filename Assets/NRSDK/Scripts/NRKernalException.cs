@@ -112,6 +112,17 @@ namespace NRKernal
         }
     }
 
+    /// <summary> A custom payload error </summary>
+    public class NRJakesCustomResultError : NRNativeError
+    {
+        /// <summary> Constructor. </summary>
+        /// <param name="msg">            The message.</param>
+        /// <param name="innerException"> (Optional) The inner exception.</param>
+        public NRJakesCustomResultError(NativeResult result, string msg, Exception innerException = null) : base(result, msg, Level.High, innerException)
+        {
+        }
+    }
+
     /// <summary> A nr sdk version mismatch error. </summary>
     public class NRSdkVersionMismatchError : NRNativeError
     {

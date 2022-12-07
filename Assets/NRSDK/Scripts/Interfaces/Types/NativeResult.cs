@@ -52,6 +52,9 @@ namespace NRKernal
         GetDisplayModeMismatch = 12,
 
         /// <summary> Not support hand tracking calculation. </summary>
-        UnSupportedHandtrackingCalculation = 14
+        UnSupportedHandtrackingCalculation = 14,
+
+        /// <summary> Testing custom returns </summary>
+        JakesCustomResult = 999
     }
 }
