@@ -95,9 +95,12 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
     }
 
     // Pause Unity
-    @Override protected void onPause()
+    // TESTING COMMENTING THIS OUT TO KEEP IT RUNNING IN THE BACKGROUND
+    // via: https://forum.unity.com/threads/application-runinbackground-is-not-working-on-android.117723/#post-2838437
+    /*@Override protected void onPause()
     {
-        //super.onPause();
+
+        super.onPause();
 
         MultiWindowSupport.saveMultiWindowMode(this);
 
@@ -105,7 +108,7 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
             return;
 
         mUnityPlayer.pause();
-    }
+    }*/
 
     // Resume Unity
     @Override protected void onResume()
@@ -158,19 +161,6 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
             return mUnityPlayer.injectEvent(event);
         return super.dispatchKeyEvent(event);
     }
-
-    // Check whether this app has android
-    // write settings permission.
-//    @RequiresApi(Build.VERSION_CODES.M)
-//    @Override public boolean hasWriteSettingsPermission() {
-//    var ret = true
-//    // Get the result from below code.
-//    ret = Settings.System.canWrite(context)
-//    return ret
-//    }
-
-    // check hasWriteSettingsPermission
-    
     
 
     // Pass any events not handled by (unfocused) views straight to UnityPlayer
