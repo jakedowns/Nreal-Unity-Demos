@@ -5,4 +5,5 @@
 -keep class com.google.androidgamesdk.ChoreographerCallback { *; }
 -keep class com.google.androidgamesdk.SwappyDisplayManager { *; }
 -keep class com.yasirkula.unity.NativeFilePickerPermissionReceiver { *; }
+-keep class com.jakedowns.VLC3D.* { *; }
 -ignorewarnings
