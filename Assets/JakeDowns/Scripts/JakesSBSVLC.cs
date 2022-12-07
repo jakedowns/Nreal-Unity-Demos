@@ -39,6 +39,8 @@ public class JakesSBSVLC : MonoBehaviour
     //Texture2D tex = null;
     bool playing = false;
 
+    AndroidJavaClass _brightnessHelper;
+
     [SerializeField]
     GameObject NRCameraRig;
     Camera LeftCamera;
@@ -57,7 +59,7 @@ public class JakesSBSVLC : MonoBehaviour
     GameObject _cone;
 
     bool _screenLocked = false;
-    float _brightnessOnLock = 0.0f;
+    int _brightnessOnLock = 0;
 
     bool _flipStereo = false;
 
@@ -139,6 +141,10 @@ public class JakesSBSVLC : MonoBehaviour
 
     public bool logToConsole = true; //Log function calls and LibVLC logs to Unity console
 
+    AndroidJavaClass unityPlayer;
+    AndroidJavaObject activity;
+    AndroidJavaObject context;
+
     //Unity Awake, OnDestroy, and Update functions
     #region unity
     void Awake()
@@ -150,6 +156,22 @@ public class JakesSBSVLC : MonoBehaviour
         //Setup Media Player
         CreateMediaPlayer();
 
+#if UNITY_ANDROID            
+        if (!Application.isEditor)
+        {
+            unityPlayer = new AndroidJavaClass("com.jakedowns.VLC3D.VLC3DActivity");
+            activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+            context = activity.Call<AndroidJavaObject>("getApplicationContext");
+
+
+            _brightnessHelper = new AndroidJavaClass("com.jakedowns.BrightnessHelper");
+            if (_brightnessHelper == null)
+            {
+                Debug.Log("error loading _brightnessHelper");
+            }
+        }
+#endif
+        
         Debug.Log($"[VLC] LibVLC version and architecture {libVLC.Changeset}");
         Debug.Log($"[VLC] LibVLCSharp version {typeof(LibVLC).Assembly.GetName().Version}");
 
@@ -980,17 +1002,41 @@ public class JakesSBSVLC : MonoBehaviour
             _logo.SetActive(false);
             _menuToggleButton.SetActive(false);
             // Lower Brightness
-            _brightnessOnLock = Screen.brightness;
-            Debug.Log($"brightness on lock {_brightnessOnLock}");
-            // Set it to 0? 0.1?
-            Screen.brightness = 0.1f;
-            // todo call out to service
+            float _unityBrightnessOnLock = Screen.brightness;
+            Debug.Log($"lockbrightness Unity brightness on lock {_unityBrightnessOnLock}");
+
+#if UNITY_ANDROID
+            if (!Application.isEditor)
+            { 
+                // get int from _brightnessHelper
+                _brightnessOnLock = (int)(_brightnessHelper?.CallStatic<int>("GetBrightness"));
+
+                Debug.Log($"lockbrightness Android brightness on lock {_brightnessOnLock}");
+
+                // Set it to 0? 0.1?
+                //Debug.Log($"set brightness with unity");
+                //Screen.brightness = 0.1f;
+
+                object _args = new object[2] { context, 1 };
+
+                // call _brightnessHelper
+                _brightnessHelper?.CallStatic("SetBrightness", _args);
+            }
+#endif
         }
         else
         {
+#if UNITY_ANDROID
+            if (!Application.isEditor)
+            {
+                object _args = new object[2] { context, _brightnessOnLock };
+                _brightnessHelper?.CallStatic("SetBrightness", _args);
+            }
+#else
             // Restore Brightness
             Screen.brightness = _brightnessOnLock;
-            
+#endif
+
             // Show All UI when screen is unlocked
             _hideWhenLocked.SetActive(true);
             _logo.SetActive(true);
@@ -1003,5 +1049,5 @@ public class JakesSBSVLC : MonoBehaviour
         if (logToConsole)
             Debug.Log($"[VLC] {message}");
     }
-    #endregion
+#endregion
 }

@@ -62,6 +62,7 @@ public class JakesVLCPlayerExampleGui : MonoBehaviour
         if (vlcPlayer?.mediaPlayer is null)
 		{
 			Debug.LogError("VLC Player mediaPlayer not found");
+			return;
 		}
         
 		//VLC Event Handlers
