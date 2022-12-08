@@ -17,6 +17,11 @@ public class JakesRemoteController : MonoBehaviour
         HideMenu();
     }
 
+    public bool MenuIsHidden()
+    {
+        return !_menu_visible;
+    }
+
     // Update is called once per frame
     void Update()
     {

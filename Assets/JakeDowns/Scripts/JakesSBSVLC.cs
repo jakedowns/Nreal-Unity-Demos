@@ -32,6 +32,8 @@ public class JakesSBSVLC : MonoBehaviour
         _180_3D
     }
 
+    public JakesRemoteController jakesRemoteController;
+
 
     LibVLC libVLC;
     public MediaPlayer mediaPlayer;
@@ -283,13 +285,13 @@ public class JakesSBSVLC : MonoBehaviour
     {
         fov = (int)fovBar.value;
         
-        if (_is360)
-        {
+        //if ()
+        //{
             LeftCamera.fieldOfView = fov;
             CenterCamera.fieldOfView = fov;
             RightCamera.fieldOfView = fov;
             Do360Navigation();
-        }
+        //}
     }
 
     public void SetVideoMode1802D()
@@ -413,7 +415,7 @@ public class JakesSBSVLC : MonoBehaviour
 
     void OnGUI()
     {
-        if(Array.IndexOf(_SphericalModes, _videoMode) == -1)
+        if(Array.IndexOf(_SphericalModes, _videoMode) == -1 || !jakesRemoteController.MenuIsHidden())
         {
             return;
         }
@@ -818,8 +820,9 @@ public class JakesSBSVLC : MonoBehaviour
             Debug.Log("Trying to set Sphere to Active!");
             _360Sphere.SetActive(true);
             _2DDisplaySet.SetActive(false);
+            flipTextureX = true;
 
-            fov = 140;
+            fov = 140;            
 
             if(mode == VideoMode._360_2D || mode == VideoMode._180_2D)
             {
@@ -868,12 +871,12 @@ public class JakesSBSVLC : MonoBehaviour
                 m_l360Renderer.material.mainTexture = texture;
                 m_r360Renderer.material.mainTexture = texture;
             }
-
-            OnFOVSliderUpdated();
         }
         else
         {
-            if(LeftCamera is not null)
+            fov = 20;
+            flipTextureX = false;
+            if (LeftCamera is not null)
                 LeftCamera.fieldOfView = 20;
 
             if (CenterCamera is not null)
@@ -916,6 +919,9 @@ public class JakesSBSVLC : MonoBehaviour
             if (m_rRenderer != null)
                 m_rRenderer.material.mainTexture = texture;
         }
+
+        fovBar.value = fov;
+        OnFOVSliderUpdated();
 
         
     }
