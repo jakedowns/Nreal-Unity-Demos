@@ -415,11 +415,6 @@ public class JakesSBSVLC : MonoBehaviour
 
     void OnGUI()
     {
-        if(Array.IndexOf(_SphericalModes, _videoMode) == -1 || !jakesRemoteController.MenuIsHidden())
-        {
-            return;
-        }
-
         if (NRInput.GetButtonDown(ControllerButton.TRIGGER))
         {
             m_PreviousPos = NRInput.GetTouch();
@@ -439,6 +434,10 @@ public class JakesSBSVLC : MonoBehaviour
 
     void Do360Navigation()
     {
+        if (!jakesRemoteController.MenuIsHidden())
+        {
+            return;
+        }
         var range = Math.Max(UnityEngine.Screen.width, UnityEngine.Screen.height);
 
         Yaw = mediaPlayer.Viewpoint.Yaw;
