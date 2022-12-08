@@ -97,7 +97,7 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
     // Pause Unity
     // TESTING COMMENTING THIS OUT TO KEEP IT RUNNING IN THE BACKGROUND
     // via: https://forum.unity.com/threads/application-runinbackground-is-not-working-on-android.117723/#post-2838437
-    /*@Override protected void onPause()
+    @Override protected void onPause()
     {
 
         super.onPause();
@@ -108,7 +108,7 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
             return;
 
         mUnityPlayer.pause();
-    }*/
+    }
 
     // Resume Unity
     @Override protected void onResume()

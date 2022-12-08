@@ -17,6 +17,15 @@ public class JakesRemoteController : MonoBehaviour
         HideMenu();
     }
 
+    void OnApplicationFocus(bool hasFocus)
+    {
+        if (hasFocus)
+        {
+            _menuPanel = GameObject.Find("MyControlPanel");
+            _og_menu = GameObject.Find("BaseControllerPanel/Buttons");
+        }
+    }
+
     public bool MenuIsHidden()
     {
         return !_menu_visible;
@@ -44,6 +53,7 @@ public class JakesRemoteController : MonoBehaviour
 
     public void ToggleMenu()
     {
+        Debug.Log("toggle menu " + !_menu_visible);
         if (_menu_visible)
         {
             HideMenu();
