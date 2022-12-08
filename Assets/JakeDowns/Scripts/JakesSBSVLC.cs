@@ -267,7 +267,8 @@ public class JakesSBSVLC : MonoBehaviour
 
     public void Demo3602D()
     {
-        Open("https://streams.videolan.org/streams/360/eagle_360.mp4");
+        //Open("https://streams.videolan.org/streams/360/eagle_360.mp4");
+        Open("https://streams.videolan.org/streams/360/kolor-balloon-icare-full-hd.mp4");
         SetVideoMode3602D();
     }
 
@@ -284,7 +285,7 @@ public class JakesSBSVLC : MonoBehaviour
     public void OnFOVSliderUpdated()
     {
         fov = (int)fovBar.value;
-        
+        Debug.Log("fov " + fov);
         //if ()
         //{
             LeftCamera.fieldOfView = fov;
