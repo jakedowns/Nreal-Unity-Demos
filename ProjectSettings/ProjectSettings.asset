@@ -793,11 +793,11 @@ PlayerSettings:
     m_VersionName: 
   apiCompatibilityLevel: 6
   activeInputHandler: 0
-  cloudProjectId: 
+  cloudProjectId: d115e270-53bf-41f5-8abc-90507c51e204
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: 
-  organizationId: 
+  projectName: VLC3D
+  organizationId: flippedswitches
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   playerDataPath: 
