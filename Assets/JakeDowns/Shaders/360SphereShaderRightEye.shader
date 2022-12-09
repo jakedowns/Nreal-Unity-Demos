@@ -51,8 +51,13 @@ Shader "JakeDowns/360SphereShaderRightEye"
 
         fixed4 frag(v2f i) : SV_Target
         {
+            
+            float2 coord = i.uv;
+            // adjust coord.x to sample just the right half of the texture
+            coord.x = (coord.x * 0.5) + 0.5;
+            
             // sample the texture
-            fixed4 col = tex2D(_MainTex, i.uv);
+            fixed4 col = tex2D(_MainTex, coord);
         // apply fog
         //UNITY_APPLY_FOG(i.fogCoord, col);
         return col;

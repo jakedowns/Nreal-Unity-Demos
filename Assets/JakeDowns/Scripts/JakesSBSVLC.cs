@@ -49,6 +49,9 @@ public class JakesSBSVLC : MonoBehaviour
     Camera CenterCamera;
     Camera RightCamera;
 
+    [SerializeField]
+    public MyIAPHandler myIAPHandler;
+
     GameObject _hideWhenLocked;
     GameObject _menuToggleButton;
     GameObject _logo;
@@ -146,6 +149,9 @@ public class JakesSBSVLC : MonoBehaviour
     AndroidJavaClass unityPlayer;
     AndroidJavaObject activity;
     AndroidJavaObject context;
+
+    // used to flag if they've watched 15 seconds of 3D 180 or 360 this session
+    bool _usedSessionFreeTrial = false;
 
     //Unity Awake, OnDestroy, and Update functions
     #region unity
@@ -811,6 +817,16 @@ public class JakesSBSVLC : MonoBehaviour
 
     public void SetVideoMode(VideoMode mode)
     {
+        if(mode == VideoMode._180_3D || mode == VideoMode._360_3D)
+        {
+          if(_usedSessionFreeTrial && !myIAPHandler.HasReceiptFor3DMode())
+            {
+                jakesRemoteController.ShowPopup();
+                return;
+            }  
+        }
+
+
         _videoMode = mode;
         Debug.Log($"[JakeDowns] set video mode {mode}");
 
