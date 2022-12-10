@@ -49,14 +49,30 @@ Shader "JakeDowns/180SphereShaderLeftEye"
                 return o;
             }
 
+            float minA = 0.0;
+            float maxA = 1.0;
+            float minB = 0.25;
+            float maxB = 0.75;
+
             fixed4 frag(v2f i) : SV_Target
-            {
+            {                
+                float2 remapped_uv = float2(i.uv);
+
+                //shift lookup x coordinate to sample just the left half of the texture
                 float2 coord = i.uv;
-                // shift lookup x coordinate to sample just the left half of the texture           
                 coord.x = coord.x * 0.5;
 
+                // Map the input value from the input range to the output range
+                //remapped_uv.x = minB + (coord.x - minA) * ((maxB - minB) / (maxA - minA));
+
+                remapped_uv.x += 0.25;
+
                 // sample the texture
-                fixed4 col = tex2D(_MainTex, coord);
+                fixed4 col = tex2D(_MainTex, remapped_uv);
+
+                if (i.uv.x < .25 || i.uv.x > .75) {
+                    col = fixed4(0.0, 0.0, 0.0, 1.0); // black
+                }
 
                 return col;
             }

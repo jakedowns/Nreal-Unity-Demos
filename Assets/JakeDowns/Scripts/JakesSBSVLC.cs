@@ -61,7 +61,11 @@ public class JakesSBSVLC : MonoBehaviour
     [SerializeField]
     public UnityEngine.UI.Slider fovBar;
 
+    [SerializeField]
+    public UnityEngine.UI.Slider scaleBar;
+
     GameObject _cone;
+    GameObject _pointLight;
 
     bool _screenLocked = false;
     int _brightnessOnLock = 0;
@@ -132,7 +136,7 @@ public class JakesSBSVLC : MonoBehaviour
     /// <summary> The previous position. </summary>
     private Vector2 m_PreviousPos;
 
-    int fov = 140; // 20 for 2D 140 for spherical
+    float fov = 140.0f; // 20 for 2D 140 for spherical
 
     //public string path = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"; //Can be a web path or a local path
     public string path = "https://jakedowns.com/media/sbs2.mp4"; // Render a nice lil SBS and 180 and 360 video that can play when you switch modes
@@ -188,6 +192,7 @@ public class JakesSBSVLC : MonoBehaviour
         OnFOVSliderUpdated();
 
         _cone = GameObject.Find("CONE_PARENT");
+        _pointLight = GameObject.Find("Point Light");
 
         //_360Sphere = GameObject.Find("SphereDisplay");
         /*if (_360Sphere is null)
@@ -239,6 +244,12 @@ public class JakesSBSVLC : MonoBehaviour
 
     void Update()
     {
+#if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            UnityEditor.EditorWindow.focusedWindow.maximized = !UnityEditor.EditorWindow.focusedWindow.maximized;
+        }
+#endif
         //Get size every frame
         uint height = 0;
         uint width = 0;
@@ -271,6 +282,11 @@ public class JakesSBSVLC : MonoBehaviour
         DestroyMediaPlayer();
     }
 
+    void OnApplicationQuit()
+    {
+        DestroyMediaPlayer();
+    }
+
     public void Demo3602D()
     {
         //Open("https://streams.videolan.org/streams/360/eagle_360.mp4");
@@ -288,9 +304,16 @@ public class JakesSBSVLC : MonoBehaviour
         _2DDisplaySet.SetActive(!_2DDisplaySet.activeSelf);
     }
 
+    public void OnScaleSliderUpdated()
+    {
+        _sphereScale = (float)scaleBar.value;
+        Debug.Log("sphere scale " + _sphereScale);
+        _360Sphere.transform.localScale = new Vector3(_sphereScale, _sphereScale, _sphereScale);
+    }
+
     public void OnFOVSliderUpdated()
     {
-        fov = (int)fovBar.value;
+        fov = (float)fovBar.value;
         Debug.Log("fov " + fov);
         //if ()
         //{
@@ -419,6 +442,7 @@ public class JakesSBSVLC : MonoBehaviour
     }*/
 
     VideoMode[] _SphericalModes = new VideoMode[4] { VideoMode._180_2D, VideoMode._360_2D, VideoMode._180_3D, VideoMode._360_3D };
+    private float _sphereScale;
 
     void OnGUI()
     {
@@ -539,6 +563,7 @@ public class JakesSBSVLC : MonoBehaviour
         Log("VLCPlayerExample Play");
 
         _cone?.SetActive(false); // hide cone logo
+        _pointLight?.SetActive(false);
 
         mediaPlayer.Play();
     }
@@ -570,6 +595,7 @@ public class JakesSBSVLC : MonoBehaviour
 
         // show cone
         _cone?.SetActive(true);
+        _pointLight?.SetActive(true);
 
 
         // clear to black
@@ -578,9 +604,24 @@ public class JakesSBSVLC : MonoBehaviour
 
     }
 
+    public void SeekForward10()
+    {
+        SeekSeconds((float)10);
+    }
+    
+    public void SeekBack10()
+    {
+        SeekSeconds((float)-10);
+    }
+
+    public void SeekSeconds(float seconds)
+    {
+        Seek((long)seconds * 1000);
+    }
+
     public void Seek(long timeDelta)
     {
-        Log("VLCPlayerExample Seek " + timeDelta);
+        Debug.Log("VLCPlayerExample Seek " + timeDelta);
         mediaPlayer.SetTime(mediaPlayer.Time + timeDelta);
     }
 
@@ -838,7 +879,7 @@ public class JakesSBSVLC : MonoBehaviour
             _2DDisplaySet.SetActive(false);
             flipTextureX = true;
 
-            fov = 140;            
+            fov = 140.0f;            
 
             if(mode == VideoMode._360_2D || mode == VideoMode._180_2D)
             {
@@ -878,7 +919,7 @@ public class JakesSBSVLC : MonoBehaviour
 
             if(mode == VideoMode._360_2D || mode == VideoMode._180_2D)
             {
-                m_l360Renderer.material = m_3602DSphericalMaterial;
+                //m_l360Renderer.material = m_3602DSphericalMaterial;
                 m_l360Renderer.material.mainTexture = texture;
             }
             else
@@ -890,7 +931,7 @@ public class JakesSBSVLC : MonoBehaviour
         }
         else
         {
-            fov = 20;
+            fov = 20.0f;
             flipTextureX = false;
             if (LeftCamera is not null)
                 LeftCamera.fieldOfView = 20;

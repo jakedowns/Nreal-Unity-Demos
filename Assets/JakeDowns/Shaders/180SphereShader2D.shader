@@ -49,10 +49,25 @@ Shader "JakeDowns/180SphereShader2D"
                 return o;
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            float minA = 0.0;
+            float maxA = 1.0;
+            float minB = 0.25;
+            float maxB = 0.75;
+
+            fixed4 frag(v2f i) : SV_Target
             {
+                float2 remapped_uv = float2(i.uv);
+                
+                // Map the input value from the input range to the output range
+                //remapped_uv.x = (i.uv.x - minA) / (maxA - minA) * (maxB - minB) + minB;
+                
                 // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
+                fixed4 col = tex2D(_MainTex, remapped_uv);
+
+                if (i.uv.x < .25 || i.uv.x > .75) {
+                    col = fixed4(0.0, 0.0, 0.0, 1.0); // black
+                }
+
                 // apply fog
                 //UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
