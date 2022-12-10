@@ -306,21 +306,28 @@ public class JakesSBSVLC : MonoBehaviour
 
     public void OnScaleSliderUpdated()
     {
-        _sphereScale = (float)scaleBar.value;
+        /*_sphereScale = (float)scaleBar.value;
+        _360Sphere = GameObject.Find("SphereDisplay");
         Debug.Log("sphere scale " + _sphereScale);
-        _360Sphere.transform.localScale = new Vector3(_sphereScale, _sphereScale, _sphereScale);
+        _360Sphere.transform.localScale = new Vector3(_sphereScale, _sphereScale, _sphereScale);*/
     }
 
     public void OnFOVSliderUpdated()
     {
         fov = (float)fovBar.value;
         Debug.Log("fov " + fov);
-        //if ()
-        //{
-            LeftCamera.fieldOfView = fov;
-            CenterCamera.fieldOfView = fov;
-            RightCamera.fieldOfView = fov;
-            Do360Navigation();
+
+        Debug.Log("fov before: " + LeftCamera.fieldOfView + ", " + CenterCamera.fieldOfView + ", " + RightCamera.fieldOfView);
+        
+        LeftCamera.fieldOfView = fov;
+        CenterCamera.fieldOfView = fov;
+        RightCamera.fieldOfView = fov;
+
+        Debug.Log("fov after: " + LeftCamera.fieldOfView + ", " + CenterCamera.fieldOfView + ", " + RightCamera.fieldOfView);
+
+        Do360Navigation();
+
+        Debug.Log("fov after 360 nav" + LeftCamera.fieldOfView + ", " + CenterCamera.fieldOfView + ", " + RightCamera.fieldOfView);
         //}
     }
 

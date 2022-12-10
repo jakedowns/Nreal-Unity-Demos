@@ -17,6 +17,7 @@ public class JakesVLCPlayerExampleGui : MonoBehaviour
 	//public RawImage screen;
 	//public AspectRatioFitter screenAspectRatioFitter;
 	public Slider seekBar;
+	public Slider scaleBar;
 	public Button playButton;
 	public Button pauseButton;
 	public Button stopButton;
@@ -41,6 +42,8 @@ public class JakesVLCPlayerExampleGui : MonoBehaviour
 	bool _isPlaying = false; //We use VLC events to track whether we are playing, rather than relying on IsPlaying 
 	bool _isDraggingSeekBar = false; //We advance the seek bar every frame, unless the user is dragging it
 
+	bool _isDraggingScaleBar = false;
+	
 	///Unity wants to do everything on the main thread, but VLC events use their own thread.
 	///These variables can be set to true in a VLC event handler indicate that a function should be called next Update.
 	///This is not actually thread safe and should be gone soon!
@@ -142,8 +145,25 @@ public class JakesVLCPlayerExampleGui : MonoBehaviour
 		});
 		seekBarEvents.triggers.Add(seekBarPointerUp);
 
-		//Path Input
-		pathInputField.text = vlcPlayer.path;
+        // Scale Bar Events
+        //Seek Bar Events
+        var scaleBarEvents = scaleBar.GetComponent<EventTrigger>();
+
+        EventTrigger.Entry scaleBarPointerDown = new EventTrigger.Entry();
+        scaleBarPointerDown.eventID = EventTriggerType.PointerDown;
+        scaleBarPointerDown.callback.AddListener((data) => { _isDraggingScaleBar = true; });
+        scaleBarEvents.triggers.Add(scaleBarPointerDown);
+
+        EventTrigger.Entry scaleBarPointerUp = new EventTrigger.Entry();
+        scaleBarPointerUp.eventID = EventTriggerType.PointerUp;
+        scaleBarPointerUp.callback.AddListener((data) => {
+            _isDraggingScaleBar = false;
+            GameObject.Find("SphereDisplay").transform.localScale = new Vector3(scaleBar.value, scaleBar.value, scaleBar.value);
+        });
+        scaleBarEvents.triggers.Add(scaleBarPointerUp);
+
+        //Path Input
+        pathInputField.text = vlcPlayer.path;
 		pathGroup.SetActive(false);
 
 		//Track Selection Buttons
@@ -168,6 +188,11 @@ public class JakesVLCPlayerExampleGui : MonoBehaviour
 		UpdatePlayPauseButton(_isPlaying);
 
 		UpdateSeekBar();
+
+		if (_isDraggingScaleBar)
+		{
+            GameObject.Find("SphereDisplay").transform.localScale = new Vector3(scaleBar.value, scaleBar.value, scaleBar.value);
+        }
 
 		if (_shouldUpdateTracks)
 		{

@@ -51,7 +51,7 @@ Shader "JakeDowns/360SphereShaderLeftEye"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float2 coord = i.uv;
+                float2 coord = float2(i.uv);
                 // shift lookup x coordinate to sample just the left half of the texture           
                 coord.x = coord.x * 0.5;
                 

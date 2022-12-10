@@ -4233,8 +4233,8 @@ Transform:
   m_GameObject: {fileID: 549580756}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 92.58216, y: 85.89122, z: 85.89122}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 100, y: 100, z: 100}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 2108740527}
   m_RootOrder: 0
@@ -4949,7 +4949,7 @@ MonoBehaviour:
   m_IgnoreLayout: 0
   m_MinWidth: -1
   m_MinHeight: -1
-  m_PreferredWidth: 1000000
+  m_PreferredWidth: 1000
   m_PreferredHeight: -1
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
@@ -4998,7 +4998,7 @@ MonoBehaviour:
   m_FillRect: {fileID: 1356231208}
   m_HandleRect: {fileID: 1625137408}
   m_Direction: 0
-  m_MinValue: 0.5
+  m_MinValue: 0.01
   m_MaxValue: 10
   m_WholeNumbers: 0
   m_Value: 1
@@ -6163,7 +6163,7 @@ Transform:
   m_GameObject: {fileID: 813930372}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 92.58216, y: 85.89122, z: 85.89122}
+  m_LocalScale: {x: 100, y: 100, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2108740527}
@@ -9712,6 +9712,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   vlcPlayer: {fileID: 1991896282}
   seekBar: {fileID: 1516209032}
+  scaleBar: {fileID: 617355922}
   playButton: {fileID: 1246672278}
   pauseButton: {fileID: 1603396387}
   stopButton: {fileID: 425669261}
@@ -10975,9 +10976,9 @@ MonoBehaviour:
   m_HandleRect: {fileID: 542666028}
   m_Direction: 2
   m_MinValue: 0
-  m_MaxValue: 1
+  m_MaxValue: 100
   m_WholeNumbers: 0
-  m_Value: 1
+  m_Value: 100
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -15504,7 +15505,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2108740526}
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: -11.62}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
