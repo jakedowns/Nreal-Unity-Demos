@@ -33,9 +33,14 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
         jakesRemoteController = GameObject.Find("VirtualController").GetComponent<JakesRemoteController>();
         jakesSBSVLC = GameObject.Find("SBSDisplay").GetComponent<JakesSBSVLC>();
     }
-    
+
     // Start is called before the first frame update
-    async void Start()
+    void Start()
+    {
+        InitPurchasing();
+    }
+
+    async void InitPurchasing()
     {
         try
         {
@@ -93,10 +98,10 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        
-    }
+//    void Update()
+//    {
+//
+//    }
 
     /// <summary>
     /// Called when Unity IAP is ready to make purchases.
@@ -139,6 +144,11 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
 
     public void Purchase3DMode()
     {
+        if(this.m_StoreController is null){
+            this.InitPurchasing();
+            jakesRemoteController.ShowCustomPopup("Error. Store not ready", "Please try again");
+            return;
+        }
         this.m_StoreController.InitiatePurchase(_3DModeProductID);
     }
 
