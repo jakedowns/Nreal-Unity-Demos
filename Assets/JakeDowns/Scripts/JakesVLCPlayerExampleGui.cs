@@ -12,10 +12,12 @@ using LibVLCSharp;
 public class JakesVLCPlayerExampleGui : MonoBehaviour
 {
 	public JakesSBSVLC vlcPlayer;
-	
+
 	//GUI Elements
 	//public RawImage screen;
 	//public AspectRatioFitter screenAspectRatioFitter;
+	public Button Rewind10Button;
+	public Button FFW10Button;
 	public Slider seekBar;
 	public Slider scaleBar;
 	public Button playButton;
@@ -112,7 +114,16 @@ public class JakesVLCPlayerExampleGui : MonoBehaviour
 		};
 
 		//Buttons
-		pauseButton.onClick.AddListener(() => { vlcPlayer.Pause(); });
+		Rewind10Button.onClick.AddListener(() => {
+			Debug.Log("Rewind10Button");
+			vlcPlayer.SeekBack10();
+        });
+		FFW10Button.onClick.AddListener(() =>
+		{
+            Debug.Log("FFW10Button");
+            vlcPlayer.SeekForward10();
+        });
+        pauseButton.onClick.AddListener(() => { vlcPlayer.Pause(); });
 		playButton.onClick.AddListener(() => { vlcPlayer.Play(); });
 		stopButton.onClick.AddListener(() => { vlcPlayer.Stop(); });
 		pathButton.onClick.AddListener(() => { 

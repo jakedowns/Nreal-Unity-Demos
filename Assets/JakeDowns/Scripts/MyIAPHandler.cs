@@ -1,12 +1,14 @@
+using Samples.Purchasing.Core.LocalReceiptValidation;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using TMPro;
 using Unity.Services.Analytics;
 using Unity.Services.Core;
 using Unity.Services.Core.Environments;
 using UnityEngine;
 using UnityEngine.Purchasing;
+using UnityEngine.Purchasing.Security;
+using Product = UnityEngine.Purchasing.Product;
 //using static UnityEditor.ObjectChangeEventStream;
 
 public class MyIAPHandler : MonoBehaviour, IStoreListener
@@ -14,10 +16,22 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
 
     private IStoreController m_StoreController;
     private IExtensionProvider m_StoreExtensionProvider;
+    CrossPlatformValidator m_Validator = null;
+    public JakesRemoteController jakesRemoteController;
+    public JakesSBSVLC jakesSBSVLC;
+    bool m_UseAppleStoreKitTestCertificate = false;
+
+    public string _3DModeProductID = "com.jakedowns.vlc3d.180_360_3D_mode";
 
     public MyIAPHandler()
     {
         
+    }
+
+    void Awake()
+    {
+        jakesRemoteController = GameObject.Find("VirtualController").GetComponent<JakesRemoteController>();
+        jakesSBSVLC = GameObject.Find("SBSDisplay").GetComponent<JakesSBSVLC>();
     }
     
     // Start is called before the first frame update
@@ -26,7 +40,7 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
         try
         {
             var options = new InitializationOptions()
-                .SetEnvironmentName("staging");
+                .SetEnvironmentName("production");
 
             await UnityServices.InitializeAsync(options);
         }
@@ -38,12 +52,44 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
 
         AnalyticsService.Instance.OptOut();
         var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
-        builder.AddProduct("180_360_3D_mode", ProductType.NonConsumable, new IDs
+        builder.AddProduct(_3DModeProductID, ProductType.NonConsumable);
+        /*, new IDs
         {
-            {"180_360_3D_mode", GooglePlay.Name},
+            {_3DModeProductID, GooglePlay.Name},
             //{"180_360_3D_mode", MacAppStore.Name}
         });
+        */
         UnityPurchasing.Initialize(this, builder);
+    }
+
+    static bool IsCurrentStoreSupportedByValidator()
+    {
+        //The CrossPlatform validator only supports the GooglePlayStore and Apple's App Stores.
+        return IsGooglePlayStoreSelected(); // || IsAppleAppStoreSelected();
+    }
+
+    static bool IsGooglePlayStoreSelected()
+    {
+        var currentAppStore = StandardPurchasingModule.Instance().appStore;
+        return currentAppStore == AppStore.GooglePlay;
+    }
+
+    void InitializeValidator()
+    {
+        if (IsCurrentStoreSupportedByValidator())
+        {
+#if !UNITY_EDITOR
+                var appleTangleData = m_UseAppleStoreKitTestCertificate ? AppleStoreKitTestTangle.Data() : AppleTangle.Data();
+                m_Validator = new CrossPlatformValidator(GooglePlayTangle.Data(), appleTangleData, Application.identifier);
+#endif
+        }
+        else
+        {
+            /*jakesRemoteController.ShowCustomPopup(
+                "Error Initializing IAP Validtor",
+                $"IAP Validator is not compatible with the current app store:{StandardPurchasingModule.Instance().appStore}");
+            Debug.LogError("Error Initializing IAP Validator for " + StandardPurchasingModule.Instance().appStore);*/
+        }
     }
 
     // Update is called once per frame
@@ -60,8 +106,40 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
         this.m_StoreController = controller;
         this.m_StoreExtensionProvider = extensions;
 
-        Debug.Log("IAP Init");
-        ListPurchases();
+        Debug.Log("IAP Initialized!");
+
+        Debug.Log("Available items:");
+        foreach (var item in controller.products.all)
+        {
+            if (item.availableToPurchase)
+            {
+                Debug.Log(string.Join(" - ",
+                    new[]
+                    {
+                        item.metadata.localizedTitle,
+                        item.metadata.localizedDescription,
+                        item.metadata.isoCurrencyCode,
+                        item.metadata.localizedPrice.ToString(),
+                        item.metadata.localizedPriceString,
+                        item.transactionID,
+                        item.receipt,
+                        item.hasReceipt.ToString(),
+                    }));
+            }
+        }
+        InitializeValidator();
+        RestorePurchases(false);
+        Debug.Log("Has user unlocked 3D mode? " + HasReceiptFor3DMode().ToString());
+        if (HasReceiptFor3DMode())
+        {
+            jakesRemoteController.Unlock3DMode();
+            jakesSBSVLC.Unlock3DMode();
+        }
+    }
+
+    public void Purchase3DMode()
+    {
+        this.m_StoreController.InitiatePurchase(_3DModeProductID);
     }
 
     /// <summary>
@@ -80,17 +158,58 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
     ///
     /// May be called at any time after OnInitialized().
     /// </summary>
-    public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs e)
+    public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs args)
     {
-        Debug.Log("Purchase complete "+e.purchasedProduct.definition.id);
-        ListPurchases();
+        //Retrieve the purchased product
+        var product = args.purchasedProduct;
+
+        var isPurchaseValid = IsPurchaseValid(product);
+
+        if (isPurchaseValid)
+        {
+            //Add the purchased product to the players inventory
+            Debug.Log("Valid receipt, unlocking content.");
+            //Debug.Log("did it update the store tho? " + HasReceiptFor3DMode());
+            if (HasReceiptFor3DMode())
+            {
+                UnlockContent(product);
+            }
+            else
+            {
+                jakesRemoteController.ShowCustomPopup(
+                    "Error Completing Purchase",
+                    "Please try again later or contact vlc-support@jakedowns.com");
+            }
+        }
+        else
+        {
+            Debug.Log("Invalid receipt, not unlocking content.");
+        }
+
+        //We return Complete, informing Unity IAP that the processing on our side is done and the transaction can be closed.
         return PurchaseProcessingResult.Complete;
+    }
+
+    public void UnlockContent(Product product)
+    {
+        switch (product.definition.id)
+        {
+            case "com.jakedowns.vlc3d.180_360_3D_mode":
+                jakesRemoteController.HideLockedPopup();
+                jakesRemoteController.ShowCustomPopup("Thank You", "You now have unlimited 3D playback of 180 and 360 videos. Enjoy!");
+                jakesRemoteController.Unlock3DMode();
+                jakesSBSVLC.Unlock3DMode();
+                break;
+            default:
+                jakesRemoteController.ShowCustomPopup("error", "unknown product id " + product.definition.id);
+                break;
+        }
     }
 
     public void OnPurchaseComplete(UnityEngine.Purchasing.Product product)
     {
         Debug.Log("Purchase Complete "+product.definition.id);
-        ListPurchases();
+        //ListPurchases();
     }
 
     /// <summary>
@@ -102,19 +221,47 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
         //throw new System.NotImplementedException();
     }
 
-    public void RestorePurchases()
+    bool IsPurchaseValid(Product product)
+    {
+        //If we the validator doesn't support the current store, we assume the purchase is valid
+        if (IsCurrentStoreSupportedByValidator())
+        {
+            try
+            {
+                var result = m_Validator.Validate(product.receipt);
+                //The validator returns parsed receipts.
+                LogReceipts(result);
+            }
+            //If the purchase is deemed invalid, the validator throws an IAPSecurityException.
+            catch (IAPSecurityException reason)
+            {
+                Debug.Log($"Invalid receipt: {reason}");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+
+    public void RestorePurchases(bool show_popup = false)
     {
         m_StoreExtensionProvider.GetExtension<IAppleExtensions>().RestoreTransactions(result =>
         {
 
             if (result)
             {
-                Debug.Log("Restore purchases succeeded.");
+                Debug.Log($"Restore purchases succeeded. {result}");
                 /*Dictionary<string, object> parameters = new Dictionary<string, object>()
                 {
                     { "restore_success", true },
                 };*/
                 //AnalyticsService.Instance.CustomData("myRestore", parameters);
+
+                if(show_popup){
+                    ShowRestorePopup();
+                }
             }
             else
             {
@@ -124,6 +271,7 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
                     { "restore_success", false },
                 };*/
                 //AnalyticsService.Instance.CustomData("myRestore", parameters);
+                ShowRestoreFailedPopup();
             }
 
             //AnalyticsService.Instance.Flush();
@@ -131,29 +279,57 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
 
     }
 
-    public void ListPurchases()
+    public void ShowRestorePopup()
     {
-        if(m_StoreController?.products?.all is null)
+        if (HasReceiptFor3DMode())
         {
-            Debug.LogWarning("m_StoreController never initialized");
-            return;   
+            jakesRemoteController.ShowCustomPopup("Restore Successful", "You have successfully restored your purchases. You now have unlimited 3D playback of 180 and 360 videos. Enjoy!");
         }
-        foreach (UnityEngine.Purchasing.Product item in m_StoreController?.products?.all)
+        else
         {
-            if (item.hasReceipt)
-            {
-                Debug.Log("Has receipt for  " + item.receipt.ToString());
-            }
-            else
-                Debug.LogWarning("No receipt for " + item.definition.id.ToString());
+            jakesRemoteController.ShowCustomPopup("Restore Successful", "You have successfully restored your purchases. You do not have any purchases to restore.");
         }
+    }
+
+    public void ShowRestoreFailedPopup()
+    {
+        jakesRemoteController.ShowCustomPopup("Restore Failed", "We were unable to restore your purchases. Please try again later.");
+    }
+
+    static void LogReceipts(IEnumerable<IPurchaseReceipt> receipts)
+    {
+        Debug.Log("Receipt is valid. Contents:");
+        foreach (var receipt in receipts)
+        {
+            LogReceipt(receipt);
+        }
+    }
+    static void LogReceipt(IPurchaseReceipt receipt)
+    {
+        Debug.Log($"Product ID: {receipt.productID}\n" +
+                  $"Purchase Date: {receipt.purchaseDate}\n" +
+                  $"Transaction ID: {receipt.transactionID}");
+
+        if (receipt is GooglePlayReceipt googleReceipt)
+        {
+            Debug.Log($"Purchase State: {googleReceipt.purchaseState}\n" +
+                      $"Purchase Token: {googleReceipt.purchaseToken}");
+        }
+
+        /*if (receipt is AppleInAppPurchaseReceipt appleReceipt)
+        {
+            Debug.Log($"Original Transaction ID: {appleReceipt.originalTransactionIdentifier}\n" +
+                      $"Subscription Expiration Date: {appleReceipt.subscriptionExpirationDate}\n" +
+                      $"Cancellation Date: {appleReceipt.cancellationDate}\n" +
+                      $"Quantity: {appleReceipt.quantity}");
+        }*/
     }
 
     public bool HasReceiptFor3DMode()
     {
         foreach (UnityEngine.Purchasing.Product item in m_StoreController.products.all)
         {
-            if (item.definition.id == "180_360_3D_mode" && item.hasReceipt)
+            if (item.definition.id == _3DModeProductID && item.hasReceipt)
             {
                 return true;
             }

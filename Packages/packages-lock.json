@@ -83,7 +83,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.purchasing": {
-      "version": "4.4.1",
+      "version": "4.5.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {

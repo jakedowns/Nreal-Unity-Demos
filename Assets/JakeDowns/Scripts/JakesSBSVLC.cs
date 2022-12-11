@@ -12,9 +12,6 @@ using NRKernal;
 //using static JakesSBSVLC;
 //using static UnityEditor.Experimental.GraphView.GraphView;
 
-/**
- * @TODO: change camera FOV when switching to 360 mode
- */
 
 
 public class JakesSBSVLC : MonoBehaviour
@@ -31,6 +28,10 @@ public class JakesSBSVLC : MonoBehaviour
         _360_3D,
         _180_3D
     }
+
+
+    private float nextActionTime = 0.0f;
+    public float period = 1.0f; 
 
     public JakesRemoteController jakesRemoteController;
 
@@ -127,6 +128,12 @@ public class JakesSBSVLC : MonoBehaviour
     float Pitch;
     float Roll;
 
+    bool _3DModeLocked = true;
+
+    int _3DTrialPlaybackStartedAt = 0;
+    float _MaxTrialPlaybackSeconds = 5.0f; //15.0f;
+    bool _isTrialing3DMode = false;
+
     float _aspectRatio;
     bool m_updatedARSinceOpen = false;
 
@@ -152,10 +159,7 @@ public class JakesSBSVLC : MonoBehaviour
 
     AndroidJavaClass unityPlayer;
     AndroidJavaObject activity;
-    AndroidJavaObject context;
-
-    // used to flag if they've watched 15 seconds of 3D 180 or 360 this session
-    bool _usedSessionFreeTrial = false;
+    AndroidJavaObject context;    
 
     //Unity Awake, OnDestroy, and Update functions
     #region unity
@@ -244,6 +248,17 @@ public class JakesSBSVLC : MonoBehaviour
 
     void Update()
     {
+
+        if (_isTrialing3DMode && (bool)mediaPlayer?.IsPlaying)
+        {
+            if (UnityEngine.Time.time > nextActionTime)
+            {
+                nextActionTime = UnityEngine.Time.time + period;
+                CheckTrialExceeded();
+            }
+        }
+
+
 #if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.F1))
         {
@@ -472,7 +487,7 @@ public class JakesSBSVLC : MonoBehaviour
 
     void Do360Navigation()
     {
-        if (!jakesRemoteController.MenuIsHidden())
+        if (!jakesRemoteController.OGMenuVisible())
         {
             return;
         }
@@ -863,19 +878,42 @@ public class JakesSBSVLC : MonoBehaviour
         SetVideoMode(_videoMode);
     }
 
+    public bool CheckTrialExceeded()
+    {
+        if (!_3DModeLocked)
+        {
+            return false;
+        }
+        System.DateTime epochStart = new System.DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc);
+        int cur_time = (int)(System.DateTime.UtcNow - epochStart).TotalSeconds;
+        Debug.Log("trial exceeded? " + $"cur_time {cur_time} start {_3DTrialPlaybackStartedAt} diff {cur_time - _3DTrialPlaybackStartedAt} v {_MaxTrialPlaybackSeconds}");
+        bool trialExceeded = _3DTrialPlaybackStartedAt == 0 ? false : (cur_time - _3DTrialPlaybackStartedAt) > _MaxTrialPlaybackSeconds;
+
+        if (_videoMode == VideoMode._180_3D || _videoMode == VideoMode._360_3D)
+        {
+            // !myIAPHandler.HasReceiptFor3DMode()
+            if (trialExceeded)
+            {
+                jakesRemoteController.ShowLockedPopup();
+                _videoMode = VideoMode.SBSHalf;
+                // unset flag
+                _isTrialing3DMode = false;
+                Pause();
+            } else
+            {
+                if(_3DTrialPlaybackStartedAt == 0){
+                    _3DTrialPlaybackStartedAt = cur_time;
+                    _isTrialing3DMode = true;
+                }
+            }
+        }
+        return trialExceeded;
+    }
+
     public void SetVideoMode(VideoMode mode)
     {
-        if(mode == VideoMode._180_3D || mode == VideoMode._360_3D)
-        {
-          if(_usedSessionFreeTrial && !myIAPHandler.HasReceiptFor3DMode())
-            {
-                jakesRemoteController.ShowPopup();
-                return;
-            }  
-        }
-
-
         _videoMode = mode;
+        CheckTrialExceeded();
         Debug.Log($"[JakeDowns] set video mode {mode}");
 
         if (Array.IndexOf(_SphericalModes, mode) > -1)
@@ -1182,4 +1220,9 @@ public class JakesSBSVLC : MonoBehaviour
             Debug.Log($"[VLC] {message}");
     }
 #endregion
+
+    public void Unlock3DMode()
+    {
+        _3DModeLocked = false;
+    }
 }
