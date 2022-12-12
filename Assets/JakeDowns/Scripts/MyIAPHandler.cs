@@ -21,7 +21,7 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
     public JakesSBSVLC jakesSBSVLC;
     bool m_UseAppleStoreKitTestCertificate = false;
 
-    public string _3DModeProductID = "com.jakedowns.vlc3d.180_360_3D_mode";
+    public string _3DModeProductID = "com.jakedowns.vlc3d.180_360_3d_mode";
 
     public MyIAPHandler()
     {
