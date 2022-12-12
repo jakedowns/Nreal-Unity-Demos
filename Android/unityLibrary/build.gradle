@@ -29,8 +29,8 @@ android {
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
         }
-        versionCode 3
-        versionName '0.0.5.b'
+        versionCode 4
+        versionName '0.0.5.c'
         consumerProguardFiles 'proguard-unity.txt', 'proguard-user.txt'
     }
 
