@@ -60,6 +60,9 @@ public class JakesSBSVLC : MonoBehaviour
     public UnityEngine.UI.Slider fovBar;
 
     [SerializeField]
+    public Slider nrealFOVBar;
+
+    [SerializeField]
     public UnityEngine.UI.Slider scaleBar;
 
     GameObject _cone;
@@ -141,6 +144,7 @@ public class JakesSBSVLC : MonoBehaviour
     private Vector2 m_PreviousPos;
 
     float fov = 140.0f; // 20 for 2D 140 for spherical
+    float nreal_fov = 140.0f;
 
     //public string path = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"; //Can be a web path or a local path
     public string path = "https://jakedowns.com/media/sbs2.mp4"; // Render a nice lil SBS and 180 and 360 video that can play when you switch modes
@@ -187,10 +191,23 @@ public class JakesSBSVLC : MonoBehaviour
         Debug.Log($"[VLC] LibVLC version and architecture {libVLC.Changeset}");
         Debug.Log($"[VLC] LibVLCSharp version {typeof(LibVLC).Assembly.GetName().Version}");
 
-        LeftCamera = NRCameraRig.transform.Find("LeftCamera").GetComponent<Camera>();
+        if (fovBar is not null)
+        {
+            fovBar.value = fov;
+        }
+        
+        if(nrealFOVBar is not null)
+        {
+            nrealFOVBar.value = nreal_fov;
+        }
+
+        /*LeftCamera = NRCameraRig.transform.Find("LeftCamera").GetComponent<Camera>();
         CenterCamera = NRCameraRig.transform.Find("CenterCamera").GetComponent<Camera>();
-        RightCamera = NRCameraRig.transform.Find("RightCamera").GetComponent<Camera>();
+        RightCamera = NRCameraRig.transform.Find("RightCamera").GetComponent<Camera>();*/
+        UpdateCameraReferences();
+        // init
         OnFOVSliderUpdated();
+        OnSplitFOVSliderUpdated();
 
         _cone = GameObject.Find("CONE_PARENT");
         _pointLight = GameObject.Find("Point Light");
@@ -326,23 +343,53 @@ public class JakesSBSVLC : MonoBehaviour
 
     public void OnFOVSliderUpdated()
     {
+        if(fovBar is null)
+        {
+            Debug.LogWarning("fovBar null");
+            return;
+        }
         fov = (float)fovBar.value;
         Debug.Log("fov " + fov);
 
-        Debug.Log("fov before: " + LeftCamera.fieldOfView + ", " + CenterCamera.fieldOfView + ", " + RightCamera.fieldOfView);
+        Do360Navigation();
+        //}
+    }
+
+    public void UpdateCameraReferences()
+    {
+        LeftCamera = GameObject.Find("LeftCamera")?.GetComponent<Camera>();
+        CenterCamera = GameObject.Find("CenterCamera")?.GetComponent<Camera>();
+        RightCamera = GameObject.Find("RightCamera")?.GetComponent<Camera>();
+    }
+
+    public void OnSplitFOVSliderUpdated()
+    {
+        UpdateCameraReferences();
+        if (nrealFOVBar is null)
+        {
+            Debug.LogWarning("nrealFOVBar null");
+            return;
+        }
         
-        LeftCamera.fieldOfView = fov;
-        CenterCamera.fieldOfView = fov;
-        RightCamera.fieldOfView = fov;
+        if(LeftCamera is null || CenterCamera is null || RightCamera is null)
+        {
+            Debug.LogWarning("camera null " + $" {LeftCamera}, {CenterCamera}, {RightCamera}");
+            return;
+        }
+        Debug.Log("fov before: " + LeftCamera.fieldOfView + ", " + CenterCamera.fieldOfView + ", " + RightCamera.fieldOfView);
+
+        nreal_fov = (float)nrealFOVBar.value;
+
+        LeftCamera.fieldOfView = nreal_fov;
+        CenterCamera.fieldOfView = nreal_fov;
+        RightCamera.fieldOfView = nreal_fov;
 
         Debug.Log("fov after: " + LeftCamera.fieldOfView + ", " + CenterCamera.fieldOfView + ", " + RightCamera.fieldOfView);
 
         Do360Navigation();
 
         Debug.Log("fov after 360 nav" + LeftCamera.fieldOfView + ", " + CenterCamera.fieldOfView + ", " + RightCamera.fieldOfView);
-        //}
     }
-
     public void SetVideoMode1802D()
     {
         SetVideoMode(VideoMode._180_2D);
@@ -493,6 +540,10 @@ public class JakesSBSVLC : MonoBehaviour
 
     void OnGUI()
     {
+        if (!jakesRemoteController.OGMenuVisible())
+        {
+            return;
+        }
         if (NRInput.GetButtonDown(ControllerButton.TRIGGER))
         {
             m_PreviousPos = NRInput.GetTouch();
@@ -512,10 +563,7 @@ public class JakesSBSVLC : MonoBehaviour
 
     void Do360Navigation()
     {
-        if (!jakesRemoteController.OGMenuVisible())
-        {
-            return;
-        }
+        
         var range = Math.Max(UnityEngine.Screen.width, UnityEngine.Screen.height);
 
         Yaw = mediaPlayer.Viewpoint.Yaw;
@@ -532,29 +580,37 @@ public class JakesSBSVLC : MonoBehaviour
         float eighty_or_delta_x = absX > 0 ? absX * 10000 : 80;
         float eighty_or_delta_y = absY > 0 ? absY * 10000 : 80;
 
-        Debug.Log($"80x {eighty_or_delta_x} 80y {eighty_or_delta_y} fov {fov}");
+        Debug.Log($"*80x {eighty_or_delta_x} 80y {eighty_or_delta_y} fov {fov} fov2 {nreal_fov}");
 
+        bool? result = null;
+        try
+        {
+            if (Input.GetKey(KeyCode.RightArrow) || deltaMove.x > 0)
+            {
+                result = mediaPlayer.UpdateViewpoint(Yaw + (float)(eighty_or_delta_x * +40 / range), Pitch, Roll, fov, true);
+            }
+            else if (Input.GetKey(KeyCode.LeftArrow) || deltaMove.x < 0)
+            {
+                result = mediaPlayer.UpdateViewpoint(Yaw - (float)(eighty_or_delta_x * +40 / range), Pitch, Roll, fov, true);
+            }
+            else if (Input.GetKey(KeyCode.DownArrow) || deltaMove.y < 0)
+            {
+                result = mediaPlayer.UpdateViewpoint(Yaw, Pitch + (float)(eighty_or_delta_y * +20 / range), Roll, fov, true);
+            }
+            else if (Input.GetKey(KeyCode.UpArrow) || deltaMove.y > 0)
+            {
+                result = mediaPlayer.UpdateViewpoint(Yaw, Pitch - (float)(eighty_or_delta_y * +20 / range), Roll, fov, true);
+            }
+        }catch(Exception e)
+        {
+            Debug.LogWarning("error updating viewpoint " + e);
+        }
 
-        if (Input.GetKey(KeyCode.RightArrow) || deltaMove.x > 0)
-        {
-            mediaPlayer.UpdateViewpoint(Yaw + (float)(eighty_or_delta_x * +40 / range), Pitch, Roll, fov);
-        }
-        else if (Input.GetKey(KeyCode.LeftArrow) || deltaMove.x < 0)
-        {
-            mediaPlayer.UpdateViewpoint(Yaw - (float)(eighty_or_delta_x * +40 / range), Pitch, Roll, fov);
-        }
-        else if (Input.GetKey(KeyCode.DownArrow) || deltaMove.y < 0)
-        {
-            mediaPlayer.UpdateViewpoint(Yaw, Pitch + (float)(eighty_or_delta_y * +20 / range), Roll, fov);
-        }
-        else if (Input.GetKey(KeyCode.UpArrow) || deltaMove.y > 0)
-        {
-            mediaPlayer.UpdateViewpoint(Yaw, Pitch - (float)(eighty_or_delta_y * +20 / range), Roll, fov);
-        }
+        Debug.Log("Update Viewpoint Result " + result.ToString());
     }
 
     //Public functions that expose VLC MediaPlayer functions in a Unity-friendly way. You may want to add more of these.
-    #region vlc
+        #region vlc
     public void Open(string path)
     {
         Log("VLCPlayerExample Open " + path);

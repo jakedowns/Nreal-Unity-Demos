@@ -188,12 +188,17 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
             {
                 jakesRemoteController.ShowCustomPopup(
                     "Error Completing Purchase",
-                    "Please try again later or contact vlc-support@jakedowns.com");
+                    "Please try again later or contact vlc-support@jakedowns.com"
+                );
             }
         }
         else
         {
             Debug.Log("Invalid receipt, not unlocking content.");
+            jakesRemoteController.ShowCustomPopup(
+                "Error Completing Purchase",
+                "Please try again later or contact vlc-support@jakedowns.com"
+            );
         }
 
         //We return Complete, informing Unity IAP that the processing on our side is done and the transaction can be closed.
