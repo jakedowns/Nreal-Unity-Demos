@@ -363,7 +363,35 @@ public class JakesSBSVLC : MonoBehaviour
         SetVideoMode(VideoMode._360_3D);
     }
 
+    public void SetAR4_3()
+    {
+        if (mediaPlayer is not null)
+            mediaPlayer.AspectRatio = "4:3";
+    }
+    
+    public void SetAR169()
+    {
+        if (mediaPlayer is not null)
+            mediaPlayer.AspectRatio = "16:9";
+    }
 
+    public void SetAR16_10()
+    {
+        if (mediaPlayer is not null)
+            mediaPlayer.AspectRatio = "16:10";
+    }
+
+    public void SetAR_2_35_to_1()
+    {
+        if (mediaPlayer is not null)
+            mediaPlayer.AspectRatio = "2.35:1";
+    }
+
+    public void SetARNull()
+    {
+        if (mediaPlayer is not null)
+            mediaPlayer.AspectRatio = null;
+    }
 
     /*
     public void PlayPause()
@@ -504,7 +532,7 @@ public class JakesSBSVLC : MonoBehaviour
         float eighty_or_delta_x = absX > 0 ? absX * 10000 : 80;
         float eighty_or_delta_y = absY > 0 ? absY * 10000 : 80;
 
-        Debug.Log($"80x {eighty_or_delta_x} 80y {eighty_or_delta_y}");
+        Debug.Log($"80x {eighty_or_delta_x} 80y {eighty_or_delta_y} fov {fov}");
 
 
         if (Input.GetKey(KeyCode.RightArrow) || deltaMove.x > 0)
