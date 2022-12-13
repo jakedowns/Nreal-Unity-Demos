@@ -5,7 +5,7 @@ using LibVLCSharp;
 //using NRKernal;
 using System.Collections.Generic;
 //using UnityEngine.Device;
-//using UnityEngine.UI;
+using UnityEngine.UI;
 using Application = UnityEngine.Device.Application;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 using NRKernal;
@@ -38,9 +38,6 @@ public class JakesSBSVLC : MonoBehaviour
 
     LibVLC libVLC;
     public MediaPlayer mediaPlayer;
-    const int seekTimeDelta = 5000;
-    //Texture2D tex = null;
-    bool playing = false;
 
     AndroidJavaClass _brightnessHelper;
 
@@ -588,6 +585,8 @@ public class JakesSBSVLC : MonoBehaviour
         _pointLight?.SetActive(false);
 
         mediaPlayer.Play();
+
+        CheckTrialExceeded();
     }
 
     public void Pause()
@@ -843,6 +842,9 @@ public class JakesSBSVLC : MonoBehaviour
                 m_updatedARSinceOpen = true;
                 _aspectRatio = (float)texture.width / (float)texture.height;
                 Debug.Log($"[SBSVLC] aspect ratio {_aspectRatio}");
+                mediaPlayer.AspectRatio = $"{texture.width}:{texture.height}";
+
+
             }
 
             if (m_lRenderer != null)
@@ -897,7 +899,7 @@ public class JakesSBSVLC : MonoBehaviour
                 jakesRemoteController.ShowLockedPopup();
                 _videoMode = VideoMode.SBSHalf;
                 // unset flag
-                _isTrialing3DMode = false;
+                //_isTrialing3DMode = false;
                 Pause();
             } else
             {
@@ -1022,6 +1024,24 @@ public class JakesSBSVLC : MonoBehaviour
                 m_rRenderer.material.mainTexture = texture;
         }
 
+        if (_vlcTexture is not null)
+        {
+            if (mode == VideoMode.Mono || mode == VideoMode._180_2D || mode == VideoMode._360_2D)
+            {
+                // 2D
+                mediaPlayer.AspectRatio = $"{_vlcTexture.width}:{_vlcTexture.height}";
+            }
+            else
+            {
+                // SBS
+                mediaPlayer.AspectRatio = $"{_vlcTexture.width / 2}:{_vlcTexture.height}";
+                if (mode == VideoMode.TB)
+                {
+                    mediaPlayer.AspectRatio = $"{_vlcTexture.width}:{_vlcTexture.height / 2}";
+                }
+            }
+        }
+        
         fovBar.value = fov;
         OnFOVSliderUpdated();
 
