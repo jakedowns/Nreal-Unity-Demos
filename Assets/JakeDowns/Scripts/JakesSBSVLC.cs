@@ -9,6 +9,7 @@ using UnityEngine.UI;
 using Application = UnityEngine.Device.Application;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 using NRKernal;
+using System.Collections;
 //using static JakesSBSVLC;
 //using static UnityEditor.Experimental.GraphView.GraphView;
 
@@ -56,6 +57,13 @@ public class JakesSBSVLC : MonoBehaviour
     public GameObject _360Sphere;
     GameObject _2DDisplaySet;
 
+    GameObject _plane2SphereSet;
+    GameObject _plane2SphereLeftEye;
+    GameObject _plane2SphereRightEye;
+
+    Renderer _morphDisplayLeftRenderer;
+    Renderer _morphDisplayRightRenderer;
+
     [SerializeField]
     public UnityEngine.UI.Slider fovBar;
 
@@ -64,6 +72,12 @@ public class JakesSBSVLC : MonoBehaviour
 
     [SerializeField]
     public UnityEngine.UI.Slider scaleBar;
+
+    [SerializeField]
+    public UnityEngine.UI.Slider distanceBar;
+
+    [SerializeField]
+    public UnityEngine.UI.Slider deformBar;
 
     GameObject _cone;
     GameObject _pointLight;
@@ -98,8 +112,8 @@ public class JakesSBSVLC : MonoBehaviour
     Renderer m_l360Renderer;
     Renderer m_r360Renderer;
 
-    Material m_lMaterial;
-    Material m_rMaterial;
+    public Material m_lMaterial;
+    public Material m_rMaterial;
     public Material m_monoMaterial;
     public Material m_leftEyeTBMaterial;
     public Material m_rightEyeTBMaterial;
@@ -201,9 +215,11 @@ public class JakesSBSVLC : MonoBehaviour
             nrealFOVBar.value = nreal_fov;
         }
 
-        /*LeftCamera = NRCameraRig.transform.Find("LeftCamera").GetComponent<Camera>();
-        CenterCamera = NRCameraRig.transform.Find("CenterCamera").GetComponent<Camera>();
-        RightCamera = NRCameraRig.transform.Find("RightCamera").GetComponent<Camera>();*/
+        _plane2SphereSet = GameObject.Find("NewDisplay");
+        _plane2SphereLeftEye = GameObject.Find("plane2sphereLeftEye");
+        _plane2SphereRightEye = GameObject.Find("plane2sphereRightEye");
+
+
         UpdateCameraReferences();
         // init
         OnFOVSliderUpdated();
@@ -220,10 +236,10 @@ public class JakesSBSVLC : MonoBehaviour
 
         //leftEyeSphere = _360Sphere.transform.Find("LeftEye").gameObject;
         //rightEyeSphere = _360Sphere.transform.Find("RightEye").gameObject;
-        m_l360Renderer = leftEyeSphere.GetComponent<Renderer>();
-        m_r360Renderer = rightEyeSphere.GetComponent<Renderer>();
+        /*m_l360Renderer = leftEyeSphere.GetComponent<Renderer>();
+        m_r360Renderer = rightEyeSphere.GetComponent<Renderer>();*/
 
-        _2DDisplaySet = GameObject.Find("SBSDisplay/DisplaySet");
+        /*_2DDisplaySet = GameObject.Find("SBSDisplay/DisplaySet");*/
 
         // TODO: extract lockscreen logic into a separate script
         _hideWhenLocked = GameObject.Find("HideWhenScreenLocked");
@@ -236,12 +252,12 @@ public class JakesSBSVLC : MonoBehaviour
         if (canvasScreen == null)
             canvasScreen = GetComponent<RawImage>();*/
 
-        m_lRenderer = leftEye.GetComponent<Renderer>();
-        m_rRenderer = rightEye.GetComponent<Renderer>();
+        _morphDisplayLeftRenderer = _plane2SphereLeftEye.GetComponent<Renderer>();
+        _morphDisplayRightRenderer = _plane2SphereRightEye.GetComponent<Renderer>();
 
         // read material reference
-        m_lMaterial = m_lRenderer.material;
-        m_rMaterial = m_rRenderer.material;
+        //m_lMaterial = _morphDisplayLeftRenderer.material;
+        //m_rMaterial = _morphDisplayRightRenderer.material;
 
         //Automatically flip on android
         if (automaticallyFlipOnAndroid && UnityEngine.Application.platform == RuntimePlatform.Android)
@@ -335,10 +351,116 @@ public class JakesSBSVLC : MonoBehaviour
 
     public void OnScaleSliderUpdated()
     {
+        float newScale = (float)scaleBar.value;
+        //_2DDisplaySet.transform.localScale = new Vector3(newScale, newScale, 1.0f);
+
+        _plane2SphereSet.transform.localScale = new Vector3(newScale, newScale, newScale);
+
         /*_sphereScale = (float)scaleBar.value;
         _360Sphere = GameObject.Find("SphereDisplay");
         Debug.Log("sphere scale " + _sphereScale);
         _360Sphere.transform.localScale = new Vector3(_sphereScale, _sphereScale, _sphereScale);*/
+    }
+
+    public void OnDeformSliderUpdated()
+    {
+        if(deformBar is null)
+        {
+            return;
+        }
+        
+        float value = (float)deformBar.value;
+
+        if(_plane2SphereLeftEye is not null)
+        {
+            _plane2SphereLeftEye.GetComponent<SkinnedMeshRenderer>().SetBlendShapeWeight(0, value);
+            _plane2SphereLeftEye.GetComponent<SkinnedMeshRenderer>().SetBlendShapeWeight(1, value);
+        }
+
+        if (_plane2SphereRightEye is not null)
+        {
+            _plane2SphereRightEye.GetComponent<SkinnedMeshRenderer>().SetBlendShapeWeight(0, value);
+            _plane2SphereRightEye.GetComponent<SkinnedMeshRenderer>().SetBlendShapeWeight(1, value);
+        }
+    }
+
+    float lerpDuration = 1; // TODO: dynamic duration based on startValue
+    float startValue = 0;
+    float endValue = 10;
+    IEnumerator lerpLZero;
+    IEnumerator lerpLOne;
+    IEnumerator lerpRZero;
+    IEnumerator lerpROne;
+    //float valueToLerp;
+
+    public void TogglePlaneToSphere()
+    {
+        float current = _plane2SphereLeftEye.GetComponent<SkinnedMeshRenderer>().GetBlendShapeWeight(0);
+        if (current < 50)
+        {
+            AnimatePlaneToSphere();
+        }
+        else
+        {
+            AnimateSphereToPlane();
+        }
+    }
+    public void AnimatePlaneToSphere()
+    {
+        DoPlaneSphereLerp(100.0f);
+    }
+
+    public void AnimateSphereToPlane()
+    {
+        DoPlaneSphereLerp(0.0f);
+    }
+
+    public void DoPlaneSphereLerp(float _endValue)
+    {
+        if (lerpLZero is not null)
+            StopCoroutine(lerpLZero);
+                
+        if (lerpLOne is not null)
+            StopCoroutine(lerpLOne);
+
+        if (lerpRZero is not null)
+            StopCoroutine(lerpRZero);
+        
+        if(lerpROne is not null)
+            StopCoroutine(lerpROne);
+
+        endValue = _endValue;
+
+        lerpLZero = LerpPlaneToSphere(_plane2SphereLeftEye.GetComponent<SkinnedMeshRenderer>(), 0);
+        lerpLOne = LerpPlaneToSphere(_plane2SphereLeftEye.GetComponent<SkinnedMeshRenderer>(), 1);
+
+        StartCoroutine(lerpLZero);
+        StartCoroutine(lerpLOne);
+
+        lerpRZero = LerpPlaneToSphere(_plane2SphereRightEye.GetComponent<SkinnedMeshRenderer>(), 0);
+        lerpROne = LerpPlaneToSphere(_plane2SphereRightEye.GetComponent<SkinnedMeshRenderer>(), 1);
+
+        StartCoroutine(lerpRZero);
+        StartCoroutine(lerpROne);
+    }
+
+    IEnumerator LerpPlaneToSphere(SkinnedMeshRenderer renderer, int ShapeIndex)
+    {
+        float timeElapsed = 0;
+        startValue = renderer.GetBlendShapeWeight(ShapeIndex);
+        while (timeElapsed < lerpDuration)
+        {
+            renderer.SetBlendShapeWeight(ShapeIndex,Mathf.Lerp(startValue, endValue, timeElapsed / lerpDuration));
+            timeElapsed += UnityEngine.Time.deltaTime;
+            yield return null;
+        }
+        renderer.SetBlendShapeWeight(ShapeIndex, endValue);
+    }
+
+    public void OnDistanceSliderUpdated()
+    {
+        float newDistance = (float)distanceBar.value;
+        _plane2SphereSet.transform.localPosition = new Vector3(0.0f, 0.0f, newDistance);
     }
 
     public void OnFOVSliderUpdated()
@@ -364,6 +486,10 @@ public class JakesSBSVLC : MonoBehaviour
 
     public void OnSplitFOVSliderUpdated()
     {
+        // NOTE: NRSDK doesn't support custom FOV on cameras
+        return;
+
+        /*
         UpdateCameraReferences();
         if (nrealFOVBar is null)
         {
@@ -389,6 +515,7 @@ public class JakesSBSVLC : MonoBehaviour
         Do360Navigation();
 
         Debug.Log("fov after 360 nav" + LeftCamera.fieldOfView + ", " + CenterCamera.fieldOfView + ", " + RightCamera.fieldOfView);
+        */
     }
     public void SetVideoMode1802D()
     {
@@ -1002,68 +1129,79 @@ public class JakesSBSVLC : MonoBehaviour
         CheckTrialExceeded();
         Debug.Log($"[JakeDowns] set video mode {mode}");
 
+        /*if(_plane2SphereLeftEye is not null)
+        {
+            _plane2SphereLeftEye.GetComponent<Renderer>().material = m_monoMaterial;
+            _plane2SphereLeftEye.GetComponent<Renderer>().material.mainTexture = texture;
+        }*/
+
+        if(_plane2SphereRightEye is not null)
+        {
+            _plane2SphereRightEye.GetComponent<Renderer>().material = m_monoMaterial;
+            _plane2SphereRightEye.GetComponent<Renderer>().material.mainTexture = texture;
+        }
+
         if (Array.IndexOf(_SphericalModes, mode) > -1)
         {
-            // TODO: set SBS material mainTextures to null to save battery
-            Debug.Log("Trying to set Sphere to Active!");
-            _360Sphere.SetActive(true);
-            _2DDisplaySet.SetActive(false);
-            flipTextureX = true;
+            flipTextureX = true;          
 
-            fov = 140.0f;            
-
+            /* TOGGLE VISIBILITY */
             if(mode == VideoMode._360_2D || mode == VideoMode._180_2D)
             {
                 // 2D
-                leftEyeSphere.SetActive(true);
-                rightEyeSphere.SetActive(false);
-                leftEyeSphere.layer = LayerMask.NameToLayer("Default");
+                _plane2SphereLeftEye.layer = LayerMask.NameToLayer("Default");
+                _plane2SphereRightEye.SetActive(false);
             }
             else
             {
                 // 3D
-                leftEyeSphere.SetActive(true);
-                rightEyeSphere.SetActive(true);
-                leftEyeSphere.layer = LayerMask.NameToLayer("LeftEyeOnly");
-                rightEyeSphere.layer = LayerMask.NameToLayer("RightEyeOnly");
+
+                _plane2SphereLeftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
+
+                _plane2SphereRightEye.SetActive(true);
+                _plane2SphereRightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
             }
+
+            /* SET MATERIALS */
 
             if(mode == VideoMode._360_3D)
             {
-                m_l360Renderer.material = m_leftEye360Material;
-                m_r360Renderer.material = m_rightEye360Material;
-                
+                _morphDisplayLeftRenderer.material = m_leftEye360Material;
+                _morphDisplayRightRenderer.material = m_rightEye360Material;
+
             }
             else if(mode == VideoMode._360_2D)
             {
-                m_l360Renderer.material = m_3602DSphericalMaterial;
+                _morphDisplayLeftRenderer.material = m_3602DSphericalMaterial;
             }
             else if(mode == VideoMode._180_3D)
             {
-                m_l360Renderer.material = m_leftEye180Material;
-                m_r360Renderer.material = m_rightEye180Material;
+                _morphDisplayLeftRenderer.material = m_leftEye180Material;
+                _morphDisplayRightRenderer.material = m_rightEye180Material;
             }
             else if(mode == VideoMode._180_2D)
             {
-                m_l360Renderer.material = m_1802DSphericalMaterial;
+                _morphDisplayLeftRenderer.material = m_1802DSphericalMaterial;
             }
 
+            /* SET TEXTURE */
             if(mode == VideoMode._360_2D || mode == VideoMode._180_2D)
             {
-                //m_l360Renderer.material = m_3602DSphericalMaterial;
-                m_l360Renderer.material.mainTexture = texture;
+                // 2D
+                _morphDisplayLeftRenderer.material.mainTexture = texture;
             }
             else
             {
                 // 3D
-                m_l360Renderer.material.mainTexture = texture;
-                m_r360Renderer.material.mainTexture = texture;
+                _morphDisplayLeftRenderer.material.mainTexture = texture;
+                _morphDisplayRightRenderer.material.mainTexture = texture;
             }
         }
         else
         {
-            fov = 20.0f;
             flipTextureX = false;
+            
+            /*fov = 20.0f;
             if (LeftCamera is not null)
                 LeftCamera.fieldOfView = 20;
 
@@ -1071,44 +1209,49 @@ public class JakesSBSVLC : MonoBehaviour
                 CenterCamera.fieldOfView = 20;
             
             if (RightCamera is not null)
-                RightCamera.fieldOfView = 20;
-            
+                RightCamera.fieldOfView = 20;*/
+
             // TODO: set 360 material mainTextures to null to save battery
-            Debug.Log("setting sphere inactive");
+            /*Debug.Log("setting sphere inactive");
             _360Sphere.SetActive(false);
-            _2DDisplaySet.SetActive(true);
-            
+            _2DDisplaySet.SetActive(true);*/
+
             if (mode is VideoMode.SBSHalf or VideoMode.SBSFull)
             {
-                m_lRenderer.material = _flipStereo ? m_rMaterial : m_lMaterial;
-                m_rRenderer.material = _flipStereo ? m_lMaterial : m_rMaterial;
-                leftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
-                rightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
+                _morphDisplayLeftRenderer.material = _flipStereo ? m_rMaterial : m_lMaterial;
+                _morphDisplayRightRenderer.material = _flipStereo ? m_lMaterial : m_rMaterial;
+                _plane2SphereLeftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
+                _plane2SphereRightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
+                _plane2SphereRightEye.SetActive(true);
             }
             else if (mode is VideoMode.Mono)
             {
-                m_lRenderer.material = m_monoMaterial;
-                m_rRenderer.material = m_monoMaterial;
-                leftEye.layer = LayerMask.NameToLayer("Default");
-                rightEye.layer = LayerMask.NameToLayer("Default");
+                _morphDisplayLeftRenderer.material = m_monoMaterial;
+                _plane2SphereLeftEye.layer = LayerMask.NameToLayer("Default");
+
+                _morphDisplayRightRenderer.material = m_monoMaterial;
+                _plane2SphereRightEye.layer = LayerMask.NameToLayer("Default");
+
+                _plane2SphereRightEye.SetActive(false);
             }
             else if (mode is VideoMode.TB)
             {
                 // TODO: new TB materials and shaders
                 // & add support for flipStereo
-                m_lRenderer.material = m_leftEyeTBMaterial;
-                m_rRenderer.material = m_rightEyeTBMaterial;
-                leftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
-                rightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
+                _morphDisplayLeftRenderer.material = m_leftEyeTBMaterial;
+                _morphDisplayRightRenderer.material = m_rightEyeTBMaterial;
+                _plane2SphereLeftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
+                _plane2SphereRightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
+                _plane2SphereRightEye.SetActive(true);
             }
 
-            if (m_lRenderer != null)
-                m_lRenderer.material.mainTexture = texture;
-            if (m_rRenderer != null)
-                m_rRenderer.material.mainTexture = texture;
+            if (_morphDisplayLeftRenderer != null)
+                _morphDisplayLeftRenderer.material.mainTexture = texture;
+            if (_morphDisplayRightRenderer != null)
+                _morphDisplayRightRenderer.material.mainTexture = texture;
         }
 
-        if (_vlcTexture is not null)
+        /*if (_vlcTexture is not null)
         {
             if (mode == VideoMode.Mono || mode == VideoMode._180_2D || mode == VideoMode._360_2D)
             {
@@ -1124,10 +1267,10 @@ public class JakesSBSVLC : MonoBehaviour
                     mediaPlayer.AspectRatio = $"{_vlcTexture.width}:{_vlcTexture.height / 2}";
                 }
             }
-        }
+        }*/
         
-        fovBar.value = fov;
-        OnFOVSliderUpdated();
+        //fovBar.value = fov;
+        //OnFOVSliderUpdated();
 
         
     }

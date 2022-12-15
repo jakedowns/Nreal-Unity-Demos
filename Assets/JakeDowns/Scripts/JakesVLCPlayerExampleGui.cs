@@ -202,7 +202,9 @@ public class JakesVLCPlayerExampleGui : MonoBehaviour
 
 		if (_isDraggingScaleBar)
 		{
-            GameObject.Find("SphereDisplay").transform.localScale = new Vector3(scaleBar.value, scaleBar.value, scaleBar.value);
+			/*GameObject _sphere = GameObject.Find("SphereDisplay");
+			if(_sphere is not null)
+				_sphere.transform.localScale = new Vector3(scaleBar.value, scaleBar.value, scaleBar.value);*/
         }
 
 		if (_shouldUpdateTracks)
