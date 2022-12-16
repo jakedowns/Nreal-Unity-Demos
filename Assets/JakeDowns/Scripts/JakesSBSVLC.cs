@@ -487,9 +487,10 @@ public class JakesSBSVLC : MonoBehaviour
     public void OnSplitFOVSliderUpdated()
     {
         // NOTE: NRSDK doesn't support custom FOV on cameras
-        return;
+        // NOTE: TESTING COMMENTING OUT camera.projectionMatrix = statements in NRHMDPoseTracker
+        //return;
 
-        /*
+        
         UpdateCameraReferences();
         if (nrealFOVBar is null)
         {
@@ -515,7 +516,6 @@ public class JakesSBSVLC : MonoBehaviour
         Do360Navigation();
 
         Debug.Log("fov after 360 nav" + LeftCamera.fieldOfView + ", " + CenterCamera.fieldOfView + ", " + RightCamera.fieldOfView);
-        */
     }
     public void SetVideoMode1802D()
     {
@@ -1048,6 +1048,8 @@ public class JakesSBSVLC : MonoBehaviour
             _vlcTexture = Texture2D.CreateExternalTexture((int)px, (int)py, TextureFormat.RGBA32, false, true, texptr); //Make a texture of the proper size for the video to output to
             texture = new RenderTexture(_vlcTexture.width, _vlcTexture.height, 0, RenderTextureFormat.ARGB32); //Make a renderTexture the same size as vlctex
 
+            Debug.Log($"texture size {px} {py} | {_vlcTexture.width} {_vlcTexture.height}");
+
             if (!m_updatedARSinceOpen)
             {
                 m_updatedARSinceOpen = true;
@@ -1129,11 +1131,11 @@ public class JakesSBSVLC : MonoBehaviour
         CheckTrialExceeded();
         Debug.Log($"[JakeDowns] set video mode {mode}");
 
-        /*if(_plane2SphereLeftEye is not null)
+        if(_plane2SphereLeftEye is not null)
         {
             _plane2SphereLeftEye.GetComponent<Renderer>().material = m_monoMaterial;
             _plane2SphereLeftEye.GetComponent<Renderer>().material.mainTexture = texture;
-        }*/
+        }
 
         if(_plane2SphereRightEye is not null)
         {
@@ -1143,7 +1145,7 @@ public class JakesSBSVLC : MonoBehaviour
 
         if (Array.IndexOf(_SphericalModes, mode) > -1)
         {
-            flipTextureX = true;          
+            flipTextureX = false;// true;          
 
             /* TOGGLE VISIBILITY */
             if(mode == VideoMode._360_2D || mode == VideoMode._180_2D)
@@ -1218,35 +1220,33 @@ public class JakesSBSVLC : MonoBehaviour
 
             if (mode is VideoMode.SBSHalf or VideoMode.SBSFull)
             {
+                _plane2SphereRightEye.SetActive(true);
+                
                 _morphDisplayLeftRenderer.material = _flipStereo ? m_rMaterial : m_lMaterial;
                 _morphDisplayRightRenderer.material = _flipStereo ? m_lMaterial : m_rMaterial;
                 _plane2SphereLeftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
                 _plane2SphereRightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
-                _plane2SphereRightEye.SetActive(true);
             }
             else if (mode is VideoMode.Mono)
             {
+                _plane2SphereRightEye.SetActive(false);
+
                 _morphDisplayLeftRenderer.material = m_monoMaterial;
                 _plane2SphereLeftEye.layer = LayerMask.NameToLayer("Default");
-
-                _morphDisplayRightRenderer.material = m_monoMaterial;
-                _plane2SphereRightEye.layer = LayerMask.NameToLayer("Default");
-
-                _plane2SphereRightEye.SetActive(false);
             }
             else if (mode is VideoMode.TB)
             {
-                // TODO: new TB materials and shaders
-                // & add support for flipStereo
+                _plane2SphereRightEye.SetActive(true);
                 _morphDisplayLeftRenderer.material = m_leftEyeTBMaterial;
                 _morphDisplayRightRenderer.material = m_rightEyeTBMaterial;
                 _plane2SphereLeftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
                 _plane2SphereRightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
-                _plane2SphereRightEye.SetActive(true);
+                
             }
 
             if (_morphDisplayLeftRenderer != null)
                 _morphDisplayLeftRenderer.material.mainTexture = texture;
+            
             if (_morphDisplayRightRenderer != null)
                 _morphDisplayRightRenderer.material.mainTexture = texture;
         }
