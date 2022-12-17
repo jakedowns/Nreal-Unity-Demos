@@ -764,6 +764,8 @@
         <data android:mimeType="video/*" />
         <data android:mimeType="application/x-shockwave-flash" />
       </intent-filter>-->
+      <meta-data android:name="WindowManagerPreference:FreeformWindowSize" android:value="@string/FreeformWindowSize_maximize" />
+      <meta-data android:name="WindowManagerPreference:FreeformWindowOrientation" android:value="@string/FreeformWindowOrientation_portrait" />
       <meta-data android:name="android.notch_support" android:value="true" />
     </activity>
     <meta-data android:name="nreal_sdk" android:value="true" />
@@ -771,7 +773,7 @@
     <meta-data android:name="unity.splash-mode" android:value="0" />
     <meta-data android:name="unity.splash-enable" android:value="True" />
     <meta-data android:name="unity.launch-fullscreen" android:value="True" />
-    <meta-data android:name="unity.allow-resizable-window" android:value="False" />
+    <meta-data android:name="unity.allow-resizable-window" android:value="True" />
     <meta-data android:name="notch.config" android:value="portrait|landscape" />
   </application>
   <uses-permission android:name="android.permission.BLUETOOTH" />
