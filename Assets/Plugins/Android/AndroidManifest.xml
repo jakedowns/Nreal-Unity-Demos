@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.unity3d.player" xmlns:tools="http://schemas.android.com/tools" android:installLocation="preferExternal">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.jakedowns.VLC3D" xmlns:tools="http://schemas.android.com/tools" android:installLocation="preferExternal">
   <uses-sdk tools:overrideLibrary="com.nreal.glasses_sdk" />
   <supports-screens android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" android:xlargeScreens="true" android:anyDensity="true" />
-  <application android:theme="@style/UnityThemeSelector" android:icon="@mipmap/app_icon" android:label="@string/app_name">
-    <activity android:name="com.jakedowns.VLC3D.VLC3DActivity">
+  <application android:theme="@style/UnityThemeSelector" android:icon="@mipmap/app_icon" android:label="@string/app_name" android:extractNativeLibs="true" android:exported="true" android:targetPackage="com.unity3d.player.UnityPlayerActivity">
+    <service android:name="com.kdg.toast.plugin.PedometerService" android:permission="android.permission.BIND_JOB_SERVICE" />
+    <meta-data android:name="com.samsung.android.multidisplay.keep_process_alive" android:value="true" />
+    <activity android:name=".VLC3DActivity" android:exported="true" android:label="com.unity.player.UnityPlayerActivity" android:screenOrientation="portrait" android:launchMode="singleTask" android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale|layoutDirection|density" android:resizeableActivity="false" android:hardwareAccelerated="false" android:showOnLockScreen="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
@@ -25,8 +27,10 @@
             android:theme="@style/ArchosThemeBlueOverlay" >-->
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
+        <action android:name="android.intent.action.SEND" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
+        <category android:name="android.intent.category.LAUNCHER" />
         <data android:scheme="rtmp" />
         <data android:scheme="rtmpe" />
         <data android:scheme="rtmps" />
@@ -50,8 +54,10 @@
             -->
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
+        <action android:name="android.intent.action.SEND" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
+        <category android:name="android.intent.category.LAUNCHER" />
         <data android:scheme="file" />
         <data android:scheme="content" />
         <data android:scheme="http" />
@@ -79,8 +85,10 @@
             -->
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
+        <action android:name="android.intent.action.SEND" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
+        <category android:name="android.intent.category.LAUNCHER" />
         <data android:scheme="content" />
         <data android:scheme="file" />
         <data android:scheme="http" />
@@ -413,12 +421,14 @@
         <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.WEBM" />
       </intent-filter>
       <!--
-            Need to repeat it all over again for the applications not declaring any mimeType
-            -->
+        Need to repeat it all over again for the applications not declaring any mimeType
+      -->
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
+        <action android:name="android.intent.action.SEND" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
+        <category android:name="android.intent.category.LAUNCHER" />
         <data android:scheme="content" />
         <data android:scheme="file" />
         <data android:scheme="http" />
@@ -761,4 +771,7 @@
   <uses-permission android:name="android.permission.BLUETOOTH" />
   <uses-permission android:name="com.android.vending.BILLING" />
   <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+  <uses-permission android:name="android.permission.WAKE_LOCK" />
+  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+  <uses-permission android:name="android.permission.WRITE_SETTINGS" tools:ignore="ProtectedPermissions" />
 </manifest>
