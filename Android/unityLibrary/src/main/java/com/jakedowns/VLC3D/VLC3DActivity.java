@@ -1,14 +1,23 @@
 package com.jakedowns.VLC3D;
 import com.unity3d.player.UnityPlayerActivity;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerManager;
 import android.util.Log;
 import com.jakedowns.BrightnessHelper;
 import android.widget.Toast;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -18,9 +27,36 @@ public class VLC3DActivity extends UnityPlayerActivity {
 
     Toast toast;
     String TAG = "VLC3D";
+    Context context;
+    private static final int MY_PERMISSIONS_REQUEST_WAKE_LOCK = 1;
+    PowerManager powerManager;
+    PowerManager.WakeLock wakeLock;
 
 //    public Context context;
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WAKE_LOCK)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "WAKE LOCK REQUESTING...");
+            // Permission is not granted, request it
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WAKE_LOCK},
+                    MY_PERMISSIONS_REQUEST_WAKE_LOCK);
+
+        }else{
+            // Permission has already been granted, acquire the wake lock
+            Log.d(TAG, "WAKE LOCK GRANTED");
+            powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyApp::WakeLockTag");
+            wakeLock.acquire();
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            registerActivityLifecycleCallbacks(new MyActivityLifecycleCallbacks());
+        }
+
+
         // Calls UnityPlayerActivity.onCreate()
         super.onCreate(savedInstanceState);
         // Prints debug message to Logcat
@@ -33,8 +69,8 @@ public class VLC3DActivity extends UnityPlayerActivity {
         }*/
 
         if (filepath == null) {
-            Log.e("VLC3D", "No file given, exiting");
-            showToast("error processing file");
+            Log.e(TAG, "No file given");
+            //showToast("error processing file");
             //finishWithResult(RESULT_CANCELED)
             return;
         }
@@ -43,10 +79,29 @@ public class VLC3DActivity extends UnityPlayerActivity {
 //        player.addObserver(this)
 //        player.playFile(filepath)
 
-        Log.d("VLC3D", "got filepath " + filepath);
+        Log.d(TAG, "got filepath " + filepath);
 
-//        context = getApplicationContext();
-        //Log.d("VLC3DActivity", "getBrightness " + BrightnessHelper.getBrightness(context));
+        context = getApplicationContext();
+        Log.d(TAG, "getBrightness " + BrightnessHelper.getBrightness(context));
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        if (requestCode == MY_PERMISSIONS_REQUEST_WAKE_LOCK) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission was granted, you can acquire the wake lock
+                PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+                PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyApp::WakeLockTag");
+                wakeLock.acquire(120*60*1000L /*120 minutes*/);
+                Log.e(TAG, "WAKE LOCK ACQUIRED");
+            } else {
+                // Permission was denied, you can't acquire the wake lock
+                Log.e(TAG, "WAKE LOCK DENIED");
+            }
+        }
     }
 
     public int getBrightness(){
@@ -169,7 +224,7 @@ public class VLC3DActivity extends UnityPlayerActivity {
         
 
         Log.d("VLC3DActivity", "set brightness");
-        BrightnessHelper.setBrightness(getApplicationContext(), 128);
+        BrightnessHelper.setBrightness(getApplicationContext(), 0);
 
     }
 

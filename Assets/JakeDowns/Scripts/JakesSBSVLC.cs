@@ -157,8 +157,8 @@ public class JakesSBSVLC : MonoBehaviour
     /// <summary> The previous position. </summary>
     private Vector2 m_PreviousPos;
 
-    float fov = 140.0f; // 20 for 2D 140 for spherical
-    float nreal_fov = 140.0f;
+    float fov = 20.0f; // 20 for 2D 140 for spherical
+    float nreal_fov = 20.0f;
 
     //public string path = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"; //Can be a web path or a local path
     public string path = "https://jakedowns.com/media/sbs2.mp4"; // Render a nice lil SBS and 180 and 360 video that can play when you switch modes
@@ -1314,7 +1314,7 @@ public class JakesSBSVLC : MonoBehaviour
     /// <param name="message">Message string to show in the toast.</param>
     private void _ShowAndroidToastMessage(string message)
     {
-        AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+        AndroidJavaClass unityPlayer = new AndroidJavaClass("com.jakedowns.VLC3D.VLC3DActivity");
         AndroidJavaObject unityActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
 
         if (unityActivity != null)
@@ -1355,7 +1355,7 @@ public class JakesSBSVLC : MonoBehaviour
 
     void GetContext()
     {
-        unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayerActivity");
+        unityPlayer = new AndroidJavaClass("com.jakedowns.VLC3D.VLC3DActivity");
         try
         {
             activity = unityPlayer?.GetStatic<AndroidJavaObject>("currentActivity");
