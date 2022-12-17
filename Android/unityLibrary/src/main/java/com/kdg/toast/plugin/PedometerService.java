@@ -26,9 +26,7 @@ import android.widget.Toast;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-//import com.jakedowns.VLC3D.R;
-
-import com.unity3d.player.R;
+import com.jakedowns.VLC3D.R;
 
 import org.jetbrains.annotations.Nullable;
 
