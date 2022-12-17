@@ -48,6 +48,8 @@ namespace NRKernal
                 return;
 
             }
+            // testing disabling pausing
+            return;
 
             base.Pause();
 

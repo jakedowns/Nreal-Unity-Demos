@@ -208,6 +208,9 @@ namespace NRKernal
 
         public bool Destroy()
         {
+            // testing short-circuiting destroy
+            NRDebugger.Info("[NativeRenderer] SKIP DESTROY");
+            return true;
             if (m_RenderingHandle == 0)
             {
                 return false;

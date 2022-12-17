@@ -189,6 +189,9 @@ namespace NRKernal
                 return;
             }
 
+            NRDebugger.Info("[NRVirtualDisplayer] skip pause");
+            return;
+
             Subsystem.Pause();
         }
 

@@ -3815,6 +3815,10 @@ PrefabInstance:
       propertyPath: m_DefaultVirtualDisplayer
       value: 
       objectReference: {fileID: 1406231318554104}
+    - target: {fileID: 114378715144848742, guid: 665d8158924bd2648a94fb3f87691bbb, type: 3}
+      propertyPath: LogLevel
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 665d8158924bd2648a94fb3f87691bbb, type: 3}
 --- !u!1 &436146382 stripped

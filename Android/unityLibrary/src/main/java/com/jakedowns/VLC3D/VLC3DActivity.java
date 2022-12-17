@@ -2,6 +2,7 @@ package com.jakedowns.VLC3D;
 import com.unity3d.player.UnityPlayerActivity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -14,6 +15,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.util.Log;
 import com.jakedowns.BrightnessHelper;
+
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
@@ -29,6 +32,7 @@ public class VLC3DActivity extends UnityPlayerActivity {
     String TAG = "VLC3D";
     Context context;
     private static final int MY_PERMISSIONS_REQUEST_WAKE_LOCK = 1;
+    private static final int REQUEST_SYSTEM_ALERT_WINDOW  = 1;
     PowerManager powerManager;
     PowerManager.WakeLock wakeLock;
 
@@ -49,7 +53,15 @@ public class VLC3DActivity extends UnityPlayerActivity {
             Log.d(TAG, "WAKE LOCK GRANTED");
             powerManager = (PowerManager) getSystemService(POWER_SERVICE);
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyApp::WakeLockTag");
-            wakeLock.acquire();
+            wakeLock.acquire(120*60*1000L /*120 minutes*/);
+        }
+
+        // Check if the SYSTEM_ALERT_WINDOW permission is granted
+        if (checkSelfPermission(Manifest.permission.SYSTEM_ALERT_WINDOW)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Request the SYSTEM_ALERT_WINDOW permission
+            requestPermissions(new String[] { Manifest.permission.SYSTEM_ALERT_WINDOW },
+                    REQUEST_SYSTEM_ALERT_WINDOW);
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -59,6 +71,10 @@ public class VLC3DActivity extends UnityPlayerActivity {
 
         // Calls UnityPlayerActivity.onCreate()
         super.onCreate(savedInstanceState);
+
+        // Set the window type to TYPE_APPLICATION_OVERLAY
+        getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+
         // Prints debug message to Logcat
         Log.d("OverrideActivity", "onCreate called!");
 
@@ -100,6 +116,20 @@ public class VLC3DActivity extends UnityPlayerActivity {
             } else {
                 // Permission was denied, you can't acquire the wake lock
                 Log.e(TAG, "WAKE LOCK DENIED");
+            }
+        }
+
+        if (requestCode == REQUEST_SYSTEM_ALERT_WINDOW) {
+            // Check if the SYSTEM_ALERT_WINDOW permission was granted
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // The SYSTEM_ALERT_WINDOW permission was granted
+                // ...
+                // Log permission granted
+                Log.d(TAG, "SYSTEM_ALERT_WINDOW PERMISSION GRANTED");
+            } else {
+                // The SYSTEM_ALERT_WINDOW permission was denied
+                // ...
+                Log.d(TAG, "SYSTEM_ALERT_WINDOW PERMISSION DENIED");
             }
         }
     }
@@ -213,13 +243,23 @@ public class VLC3DActivity extends UnityPlayerActivity {
         toast.show();
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Override
+    public void onPause() {
+        // don't call super
 
+        //return;
+        super.onPause();
+    }
+
+
+    @Override
     public void onBackPressed()
     {
-        showToast("back pressed");
+        //showToast("back pressed");
         
         // Instead of calling UnityPlayerActivity.onBackPressed(), this example ignores the back button event
-        super.onBackPressed();
+        //super.onBackPressed();
         
         
 

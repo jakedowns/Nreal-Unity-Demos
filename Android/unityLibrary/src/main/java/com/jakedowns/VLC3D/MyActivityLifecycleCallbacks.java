@@ -17,9 +17,9 @@ public class MyActivityLifecycleCallbacks implements Application.ActivityLifecyc
     @Override
     public void onActivityPaused(Activity activity) {
         // Release the wake lock when the activity is paused
-        if (wakeLock != null && wakeLock.isHeld()) {
-            wakeLock.release();
-        }
+//        if (wakeLock != null && wakeLock.isHeld()) {
+//            wakeLock.release();
+//        }
     }
 
     /**
