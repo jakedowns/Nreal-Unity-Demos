@@ -48,6 +48,10 @@ public class JakesRemoteController : MonoBehaviour
     {
         UpdateReferences();
 
+        string versionName = Application.version;
+        string versionCode = Application.buildGUID;
+        GameObject.Find("AppMenu/AppMenuInner/Subtitle").GetComponent<Text>().text = $"{versionName} ({versionCode})";
+
         // center things that i had spread out in Editor
         SetTransformX(_menuPanel, 0);
         SetTransformX(_app_menu, 0.0f);
