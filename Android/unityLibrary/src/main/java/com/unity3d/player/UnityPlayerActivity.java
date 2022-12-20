@@ -107,7 +107,7 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
         if (MultiWindowSupport.getAllowResizableWindow(this))
             return;
 
-        //mUnityPlayer.pause();
+        mUnityPlayer.pause();
     }
 
     // Resume Unity
