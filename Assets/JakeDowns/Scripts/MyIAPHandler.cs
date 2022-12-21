@@ -21,7 +21,7 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
     public JakesSBSVLC jakesSBSVLC;
     bool m_UseAppleStoreKitTestCertificate = false;
 
-    public string _3DModeProductID = "com.jakedowns.vlc3d.180_360_3d_mode";
+    string _3DModeProductID = "com.jakedowns.vlc3d.180_360_3d_mode";
 
     public MyIAPHandler()
     {
@@ -59,12 +59,6 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
         AnalyticsService.Instance.OptOut();
         var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
         builder.AddProduct(_3DModeProductID, ProductType.NonConsumable);
-        /*, new IDs
-        {
-            {_3DModeProductID, GooglePlay.Name},
-            //{"180_360_3D_mode", MacAppStore.Name}
-        });
-        */
         UnityPurchasing.Initialize(this, builder);
     }
 

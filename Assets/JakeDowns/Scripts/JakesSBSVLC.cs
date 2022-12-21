@@ -1058,6 +1058,7 @@ public class JakesSBSVLC : MonoBehaviour
 
     public bool CheckTrialExceeded()
     {
+        Debug.Log("CheckTrialExceeded _3DModeLocked?" + _3DModeLocked);
         if (!_3DModeLocked)
         {
             return false;
@@ -1067,15 +1068,21 @@ public class JakesSBSVLC : MonoBehaviour
         System.DateTime epochStart = new System.DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc);
         int cur_time = (int)(System.DateTime.UtcNow - epochStart).TotalSeconds;
 
+        Debug.Log("CheckTrialExceeded trialExceeded?" + trialExceeded);
+        Debug.Log("CheckTrialExceeded video mode?" + _videoMode);
+        bool deformedPastFlat = deformBar is null ? true : deformBar.value > 0.1;
+        Debug.Log("CheckTrialExceeded deformedPastFlat? " + deformBar?.value);
 
-        if (_videoMode == VideoMode._180_3D || _videoMode == VideoMode._360_3D)
+        if (_videoMode == VideoMode._180_3D || _videoMode == VideoMode._360_3D || deformedPastFlat)
         {
             if (trialExceeded)
             {
                 jakesRemoteController.ShowLockedPopup();
                 _videoMode = VideoMode.SBSHalf;
+                Debug.Log("CheckTrialExceeded PAUSE!!!");
                 Pause();
-            } else
+            } 
+            else
             {
                 if(_3DTrialPlaybackStartedAt == 0){
                     _3DTrialPlaybackStartedAt = cur_time;
