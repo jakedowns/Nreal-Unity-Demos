@@ -251,6 +251,8 @@ public class JakesSBSVLC : MonoBehaviour
             _plane2SphereSet.transform.position.z
         );
 
+        jakesRemoteController.SetJakesSBSVLC(this);
+
         UpdateCameraReferences();
         // init
         OnFOVSliderUpdated();
@@ -612,101 +614,6 @@ public class JakesSBSVLC : MonoBehaviour
             mediaPlayer.AspectRatio = null;
     }
 
-    /*
-    public void PlayPause()
-    {
-        Debug.Log ("[VLC] Toggling Play Pause !");
-        if (mediaPlayer == null)
-        {
-            mediaPlayer = new MediaPlayer(libVLC);
-        }
-        if (mediaPlayer.IsPlaying)
-        {
-            mediaPlayer.Pause();
-        }
-        else
-        {
-            playing = true;
-
-            if(mediaPlayer.Media == null)
-            {
-                // download https://streams.videolan.org/streams/360/eagle_360.mp4 
-                // to your computer (to avoid network requests for smoother navigation)
-                // and adjust the Uri to the local path
-                // var media = new Media(new Uri("https://streams.videolan.org/streams/360/eagle_360.mp4"));
-                //var media = new Media(new Uri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"));
-                
-                var media = new Media(new Uri(path));
-                
-                Task.Run(async () =>
-                {
-                    var result = await media.ParseAsync(libVLC, MediaParseOptions.ParseNetwork);
-                    var trackList = media.TrackList(TrackType.Video);
-                    _is360 = trackList[0].Data.Video.Projection == VideoProjection.Equirectangular;
-
-                    Debug.Log($"projection {trackList[0].Data.Video.Projection}");
-
-
-                    if (_is360)
-                    {
-                        Debug.Log("The video is a 360 video");
-                        _360Sphere.SetActive(true);
-                        _2DDisplaySet.SetActive(false);
-                    }
-
-                    else
-                    {
-                        Debug.Log("The video was not identified as a 360 video by VLC, make sure it is properly tagged");
-                        _360Sphere.SetActive(false);
-                        _2DDisplaySet.SetActive(true);
-                    }
-
-                    trackList.Dispose();
-                });
-                
-                mediaPlayer.Media = media;
-            }
-
-            mediaPlayer.Play();
-        }
-    } */
-
-    /*void Update()
-    {
-        if(!playing) return;
-
-        if (tex == null)
-        {
-            // If received size is not null, it and scale the texture
-            uint i_videoHeight = 0;
-            uint i_videoWidth = 0;
-
-            mediaPlayer.Size(0, ref i_videoWidth, ref i_videoHeight);
-            var texptr = mediaPlayer.GetTexture(i_videoWidth, i_videoHeight, out bool updated);
-            if (i_videoWidth != 0 && i_videoHeight != 0 && updated && texptr != IntPtr.Zero)
-            {
-                Debug.Log("Creating texture with height " + i_videoHeight + " and width " + i_videoWidth);
-                tex = Texture2D.CreateExternalTexture((int)i_videoWidth,
-                    (int)i_videoHeight,
-                    TextureFormat.RGBA32,
-                    false,
-                    true,
-                    texptr);
-                //GetComponent<Renderer>().material.mainTexture = tex;
-                m_lRenderer.material.mainTexture = tex;
-                m_rRenderer.material.mainTexture = tex;
-            }
-        }
-        else if (tex != null)
-        {
-            var texptr = mediaPlayer.GetTexture((uint)tex.width, (uint)tex.height, out bool updated);
-            if (updated)
-            {
-                tex.UpdateExternalTexture(texptr);
-            }
-        }
-    }*/
-
     VideoMode[] _SphericalModes = new VideoMode[4] { VideoMode._180_2D, VideoMode._360_2D, VideoMode._180_3D, VideoMode._360_3D };
     private float _sphereScale;
 
@@ -826,6 +733,8 @@ public class JakesSBSVLC : MonoBehaviour
         m_updatedARSinceOpen = false;
 
         Play();
+
+        SetVideoModeMono();
     }
 
     public void OpenExternal()
@@ -1138,26 +1047,33 @@ public class JakesSBSVLC : MonoBehaviour
         SetVideoMode(_videoMode);
     }
 
+    public bool GetExceededTrial()
+    {
+        System.DateTime epochStart = new System.DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc);
+        int cur_time = (int)(System.DateTime.UtcNow - epochStart).TotalSeconds;
+        Debug.Log("trial exceeded? " + $"cur_time {cur_time} start {_3DTrialPlaybackStartedAt} diff {cur_time - _3DTrialPlaybackStartedAt} v {_MaxTrialPlaybackSeconds}");
+        bool trialExceeded = _3DTrialPlaybackStartedAt == 0 ? false : (cur_time - _3DTrialPlaybackStartedAt) > _MaxTrialPlaybackSeconds;
+        return trialExceeded;
+    }
+
     public bool CheckTrialExceeded()
     {
         if (!_3DModeLocked)
         {
             return false;
         }
+
+        bool trialExceeded = GetExceededTrial();
         System.DateTime epochStart = new System.DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc);
         int cur_time = (int)(System.DateTime.UtcNow - epochStart).TotalSeconds;
-        Debug.Log("trial exceeded? " + $"cur_time {cur_time} start {_3DTrialPlaybackStartedAt} diff {cur_time - _3DTrialPlaybackStartedAt} v {_MaxTrialPlaybackSeconds}");
-        bool trialExceeded = _3DTrialPlaybackStartedAt == 0 ? false : (cur_time - _3DTrialPlaybackStartedAt) > _MaxTrialPlaybackSeconds;
+
 
         if (_videoMode == VideoMode._180_3D || _videoMode == VideoMode._360_3D)
         {
-            // !myIAPHandler.HasReceiptFor3DMode()
             if (trialExceeded)
             {
                 jakesRemoteController.ShowLockedPopup();
                 _videoMode = VideoMode.SBSHalf;
-                // unset flag
-                //_isTrialing3DMode = false;
                 Pause();
             } else
             {
@@ -1320,6 +1236,17 @@ public class JakesSBSVLC : MonoBehaviour
         //OnFOVSliderUpdated();
 
         
+    }
+
+    public void ShowCustomARPopup()
+    {
+        jakesRemoteController.ShowPopupByID(JakesRemoteController.PopupID.CUSTOM_AR_POPUP);
+    }
+
+    public void SetAspectRatio(string value)
+    {
+        if (mediaPlayer is not null)
+            mediaPlayer.AspectRatio = value;
     }
 
     // https://answers.unity.com/questions/1549639/enum-as-a-function-param-in-a-button-onclick.html?page=2&pageSize=5&sort=votes

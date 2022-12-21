@@ -42,6 +42,7 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
 
     async void InitPurchasing()
     {
+        Debug.Log("[IAP] Initializing");
         try
         {
             var options = new InitializationOptions()
@@ -113,14 +114,15 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
 
         Debug.Log("IAP Initialized!");
 
-        Debug.Log("Available items:");
+        Debug.Log("IAP Available items:");
         foreach (var item in controller.products.all)
         {
-            if (item.availableToPurchase)
-            {
+            /*if (item.availableToPurchase)
+            {*/
                 Debug.Log(string.Join(" - ",
                     new[]
                     {
+                        "[IAP] available ? " + item.availableToPurchase.ToString(),
                         item.metadata.localizedTitle,
                         item.metadata.localizedDescription,
                         item.metadata.isoCurrencyCode,
@@ -130,11 +132,19 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
                         item.receipt,
                         item.hasReceipt.ToString(),
                     }));
-            }
+            /*}*/
         }
+
+        // Retrieve the products from the store.
+        UnityEngine.Purchasing.Product[] products = controller.products.all;
+        foreach (UnityEngine.Purchasing.Product product in products)
+        {
+            Debug.Log("IAP controller.products.all: " + product.metadata.localizedTitle);
+        }
+
         InitializeValidator();
         RestorePurchases(false);
-        Debug.Log("Has user unlocked 3D mode? " + HasReceiptFor3DMode().ToString());
+        Debug.Log("IAP Has user unlocked 3D mode? " + HasReceiptFor3DMode().ToString());
         if (HasReceiptFor3DMode())
         {
             jakesRemoteController.Unlock3DMode();

@@ -8,7 +8,9 @@ using UnityEngine.UI;
 public class JakesRemoteController : MonoBehaviour
 {
     bool _menu_visible = false;
-    
+
+    JakesSBSVLC jakesSBSVLC;
+
     GameObject _menuPanel = null;
     GameObject _og_menu = null;
     GameObject _app_menu = null;
@@ -16,11 +18,13 @@ public class JakesRemoteController : MonoBehaviour
     GameObject _menu_toggle_button = null;
     GameObject _options_button = null;
     GameObject _custom_popup = null;
+    GameObject _custom_ar_popup;
 
     bool _og_menu_visible = true;
     bool _app_menu_visible = false;
     bool _popup_visible = false;
     bool _custom_popup_visible = false;
+    private bool _custom_ar_popup_visible;
 
     MenuID _visible_menu_id;
 
@@ -34,6 +38,16 @@ public class JakesRemoteController : MonoBehaviour
         APP_MENU,
     };
 
+    [SerializeField]
+    public enum PopupID
+    {
+        CUSTOM_AR_POPUP,
+        MODE_LOCKED,
+        CUSTOM_POPUP
+    }
+
+    PopupID[] popupStack;  
+
     public class UIStateBeforeCustomPopup
     {
         public UIStateBeforeCustomPopup(MenuID _visible_menu_id) 
@@ -41,6 +55,11 @@ public class JakesRemoteController : MonoBehaviour
             this.VisibleMenuID = _visible_menu_id;
         }
         public MenuID VisibleMenuID;
+    }
+
+    public void SetJakesSBSVLC(JakesSBSVLC instance)
+    {
+        jakesSBSVLC = instance;
     }
     
     // Start is called before the first frame update
@@ -57,11 +76,11 @@ public class JakesRemoteController : MonoBehaviour
         SetTransformX(_app_menu, 0.0f);
         SetTransformX(_my_popup, 0.0f);
         SetTransformX(_custom_popup, 0.0f);
+        SetTransformX(_custom_ar_popup, 0.0f);
 
         HideAllMenus();
-        // TODO: HideAllPopups
-        HideLockedPopup();
-        HideCustomPopup();
+        HideAllPopups();
+        
         ShowOGMenu();
     }
 
@@ -123,6 +142,7 @@ public class JakesRemoteController : MonoBehaviour
         _my_popup = FindGameObjectsAllFirst("MyPopup");
         _menu_toggle_button = FindGameObjectsAllFirst("MenuToggleButton");
         _custom_popup = FindGameObjectsAllFirst("CustomPopup");
+        _custom_ar_popup = FindGameObjectsAllFirst("CustomARPopup");
         _options_button = FindGameObjectsAllFirst("OptionsButton");
     }
 
@@ -287,6 +307,68 @@ public class JakesRemoteController : MonoBehaviour
         }
     }
 
+    public void HideAllPopups()
+    {
+        HideLockedPopup();
+        HideCustomPopup();
+        HideCustomARPopup();
+    }
+
+    public void ShowPopupByID(PopupID popupID)
+    {
+        stateBeforePopup = new UIStateBeforeCustomPopup(_visible_menu_id);
+        UpdateReferences();
+        
+        switch (popupID)
+        {
+            case PopupID.MODE_LOCKED:
+                ShowLockedPopup();
+                break;
+            /*case PopupID.CUSTOM:
+                ShowCustomPopup();
+                break;*/
+            case PopupID.CUSTOM_AR_POPUP:
+                ShowCustomARPopup();
+                break;
+        }
+    }
+
+    public void HidePopupByID(PopupID popupID)
+    {
+        switch (popupID)
+        {
+            case PopupID.MODE_LOCKED:
+                HideLockedPopup();
+                break;
+            /*case PopupID.CUSTOM:
+                HideCustomPopup();
+                break;*/
+            case PopupID.CUSTOM_AR_POPUP:
+                HideCustomARPopup();
+                break;
+        }
+        RestoreStateBeforePopup();
+    }
+
+    public void ShowCustomARPopup()
+    {
+        _custom_ar_popup_visible = true;
+        _custom_ar_popup.SetActive(true);
+    }
+
+    public void ApplyCustomARPopup()
+    {
+        HidePopupByID(PopupID.CUSTOM_AR_POPUP);
+        string requested_value = _custom_ar_popup.transform.Find("ARTextInput").GetComponent<InputField>().text;
+        jakesSBSVLC.SetAspectRatio(requested_value);
+    }
+
+    public void HideCustomARPopup()
+    {
+        _custom_ar_popup_visible = false;
+        _custom_ar_popup.SetActive(false);
+    }
+
     public void ShowCustomPopup(string title, string body)
     {
         stateBeforePopup = new UIStateBeforeCustomPopup(_visible_menu_id);
@@ -296,7 +378,7 @@ public class JakesRemoteController : MonoBehaviour
         _custom_popup.transform.position = new Vector3(
             _custom_popup.transform.position.x,
             _custom_popup.transform.position.y,
-            _custom_popup.transform.position.z - 1.0f
+            _custom_popup.transform.position.z - 1.0f // TODO: make this dynamic based on popup stack index
         );
         GameObject.Find("CustomPopup/PopupInner/GameObject/Title").GetComponent<Text>().text = title;
         GameObject.Find("CustomPopup/PopupInner/GameObject/Body").GetComponent<Text>().text = body;
