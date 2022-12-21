@@ -61,6 +61,8 @@ public class JakesSBSVLC : MonoBehaviour
     GameObject _plane2SphereLeftEye;
     GameObject _plane2SphereRightEye;
 
+    Vector3 _startPosition;
+
     Renderer _morphDisplayLeftRenderer;
     Renderer _morphDisplayRightRenderer;
 
@@ -78,6 +80,30 @@ public class JakesSBSVLC : MonoBehaviour
 
     [SerializeField]
     public UnityEngine.UI.Slider deformBar;
+
+    /*[SerializeField]
+    public UnityEngine.UI.Slider brightnessBar;
+
+    [SerializeField]
+    public UnityEngine.UI.Slider contrastBar;
+
+    [SerializeField]
+    public UnityEngine.UI.Slider saturationBar;
+
+    [SerializeField]
+    public UnityEngine.UI.Slider hueBar;
+
+    [SerializeField]
+    public UnityEngine.UI.Slider gammaBar;
+
+    [SerializeField]
+    public UnityEngine.UI.Slider sharpnessBar;*/
+
+    [SerializeField]
+    public UnityEngine.UI.Slider horizontalBar;
+
+    [SerializeField]
+    public UnityEngine.UI.Slider verticalBar;
 
     GameObject _cone;
     GameObject _pointLight;
@@ -174,7 +200,7 @@ public class JakesSBSVLC : MonoBehaviour
 
     AndroidJavaClass unityPlayer;
     AndroidJavaObject activity;
-    AndroidJavaObject context;    
+    AndroidJavaObject context;
 
     //Unity Awake, OnDestroy, and Update functions
     #region unity
@@ -201,7 +227,7 @@ public class JakesSBSVLC : MonoBehaviour
             }
         }
 #endif
-        
+
         Debug.Log($"[VLC] LibVLC version and architecture {libVLC.Changeset}");
         Debug.Log($"[VLC] LibVLCSharp version {typeof(LibVLC).Assembly.GetName().Version}");
 
@@ -209,8 +235,8 @@ public class JakesSBSVLC : MonoBehaviour
         {
             fovBar.value = fov;
         }
-        
-        if(nrealFOVBar is not null)
+
+        if (nrealFOVBar is not null)
         {
             nrealFOVBar.value = nreal_fov;
         }
@@ -219,6 +245,11 @@ public class JakesSBSVLC : MonoBehaviour
         _plane2SphereLeftEye = GameObject.Find("plane2sphereLeftEye");
         _plane2SphereRightEye = GameObject.Find("plane2sphereRightEye");
 
+        _startPosition = new Vector3(
+            _plane2SphereSet.transform.position.x,
+            _plane2SphereSet.transform.position.y,
+            _plane2SphereSet.transform.position.z
+        );
 
         UpdateCameraReferences();
         // init
@@ -461,6 +492,20 @@ public class JakesSBSVLC : MonoBehaviour
     {
         float newDistance = (float)distanceBar.value;
         _plane2SphereSet.transform.localPosition = new Vector3(0.0f, 0.0f, newDistance);
+    }
+
+    /* Horizontal (X) axis offset for screen */
+    public void OnHorizontalSliderUpdated()
+    {
+        float newOffset = (float)horizontalBar.value;
+        _plane2SphereSet.transform.localPosition = new Vector3(newOffset, 0.0f, 0.0f);
+    }
+
+    /* Vertical (Y) axis offset for screen */
+    public void OnVerticalSliderUpdated()
+    {
+        float newOffset = (float)verticalBar.value;
+        _plane2SphereSet.transform.localPosition = new Vector3(0.0f, newOffset, 0.0f);
     }
 
     public void OnFOVSliderUpdated()
@@ -1168,8 +1213,8 @@ public class JakesSBSVLC : MonoBehaviour
 
             if(mode == VideoMode._360_3D)
             {
-                _morphDisplayLeftRenderer.material = m_leftEye360Material;
-                _morphDisplayRightRenderer.material = m_rightEye360Material;
+                _morphDisplayLeftRenderer.material = _flipStereo ? m_rightEye360Material : m_leftEye360Material;
+                _morphDisplayRightRenderer.material = _flipStereo ? m_leftEye360Material : m_rightEye360Material;
 
             }
             else if(mode == VideoMode._360_2D)
@@ -1178,12 +1223,13 @@ public class JakesSBSVLC : MonoBehaviour
             }
             else if(mode == VideoMode._180_3D)
             {
-                _morphDisplayLeftRenderer.material = m_leftEye180Material;
-                _morphDisplayRightRenderer.material = m_rightEye180Material;
+                _morphDisplayLeftRenderer.material = _flipStereo ? m_rightEye180Material : m_leftEye180Material;
+                _morphDisplayRightRenderer.material = _flipStereo ? m_leftEye180Material : m_rightEye180Material;
             }
             else if(mode == VideoMode._180_2D)
             {
                 _morphDisplayLeftRenderer.material = m_1802DSphericalMaterial;
+                
             }
 
             /* SET TEXTURE */
@@ -1191,6 +1237,7 @@ public class JakesSBSVLC : MonoBehaviour
             {
                 // 2D
                 _morphDisplayLeftRenderer.material.mainTexture = texture;
+                _morphDisplayRightRenderer.material = null;
             }
             else
             {
@@ -1281,6 +1328,17 @@ public class JakesSBSVLC : MonoBehaviour
     public void SetVideoModeSBSHalf() => SetVideoMode(VideoMode.SBSHalf);
     public void SetVideoModeSBSFull() => SetVideoMode(VideoMode.SBSFull);
     public void SetVideoModeTB() => SetVideoMode(VideoMode.TB);
+
+    public void ResetScreen()
+    {
+        _plane2SphereLeftEye.transform.localPosition = _startPosition;
+        _plane2SphereLeftEye.transform.localRotation = Quaternion.identity;
+        _plane2SphereLeftEye.transform.localScale = new Vector3(1, 1, 1);
+
+        _plane2SphereRightEye.transform.localPosition = _startPosition;
+        _plane2SphereRightEye.transform.localRotation = Quaternion.identity;
+        _plane2SphereRightEye.transform.localScale = new Vector3(1, 1, 1);
+    }
 
     public void promptUserFilePicker()
     {

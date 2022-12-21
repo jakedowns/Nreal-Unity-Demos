@@ -233,6 +233,7 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
     public void OnPurchaseFailed(UnityEngine.Purchasing.Product product, PurchaseFailureReason failureReason)
     {
         Debug.LogError("Purchase failed: " + product.definition.id + " " + failureReason);
+        jakesRemoteController.ShowCustomPopup("Error", "Purchase failed: " + product.definition.id + " " + failureReason);
         //throw new System.NotImplementedException();
     }
 
