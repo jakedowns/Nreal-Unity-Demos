@@ -1113,7 +1113,17 @@ public class JakesSBSVLC : MonoBehaviour
         bool deformedPastFlat = deformBar is null ? false : deformBar.value > 0.1;
         Debug.Log("CheckTrialExceeded deformedPastFlat? " + deformBar?.value);
 
-        if (_videoMode == VideoMode._180_3D || _videoMode == VideoMode._360_3D || deformedPastFlat)
+        if (
+            _videoMode == VideoMode._180_3D 
+            || _videoMode == VideoMode._360_3D 
+            || (
+                deformedPastFlat 
+                && (
+                    _videoMode == VideoMode.SBSHalf
+                    || _videoMode == VideoMode.TB
+                )
+            )
+        )   
         {
             if (trialExceeded)
             {
