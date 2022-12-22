@@ -1,4 +1,5 @@
 using LibVLCSharp;
+using NRKernal;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,7 @@ public class JakesRemoteController : MonoBehaviour
     GameObject _options_button = null;
     GameObject _custom_popup = null;
     GameObject _custom_ar_popup;
+    GameObject _lockScreenNotice = null;
 
     GameObject _picture_settings_popup = null;
 
@@ -70,6 +72,14 @@ public class JakesRemoteController : MonoBehaviour
     {
         UpdateReferences();
 
+        _lockScreenNotice = GameObject.Find("LockScreenNotice");
+
+        // hide 6dof button if not supported
+        if (NRDevice.Subsystem.GetDeviceType() != NRDeviceType.NrealLight)
+        {
+            GameObject.Find("ChangeTo6Dof").SetActive(false);
+        }
+
         string versionName = Application.version;
         string versionCode = Application.buildGUID;
         GameObject.Find("AppMenu/AppMenuInner/Subtitle").GetComponent<Text>().text = $"{versionName} ({versionCode})";
@@ -80,6 +90,9 @@ public class JakesRemoteController : MonoBehaviour
         SetTransformX(_my_popup, 0.0f);
         SetTransformX(_custom_popup, 0.0f);
         SetTransformX(_custom_ar_popup, 0.0f);
+        SetTransformX(_lockScreenNotice, 0.0f);
+
+        _lockScreenNotice.SetActive(false);
 
         HideAllMenus();
         HideAllPopups();

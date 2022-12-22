@@ -52,10 +52,11 @@ public class JakesSBSVLC : MonoBehaviour
     public MyIAPHandler myIAPHandler;
 
     GameObject _hideWhenLocked;
+    GameObject _lockScreenNotice;
     GameObject _menuToggleButton;
     GameObject _logo;
-    public GameObject _360Sphere;
-    GameObject _2DDisplaySet;
+    /*public GameObject _360Sphere;*/
+    /*GameObject _2DDisplaySet;*/
 
     GameObject _plane2SphereSet;
     GameObject _plane2SphereLeftEye;
@@ -283,6 +284,7 @@ public class JakesSBSVLC : MonoBehaviour
 
         // TODO: extract lockscreen logic into a separate script
         _hideWhenLocked = GameObject.Find("HideWhenScreenLocked");
+        _lockScreenNotice = GameObject.Find("LockScreenNotice");
         _logo = GameObject.Find("logo");
         _menuToggleButton = GameObject.Find("MenuToggleButton");
 
@@ -1405,6 +1407,7 @@ public class JakesSBSVLC : MonoBehaviour
         {
             // Hide All UI except for the lock button
             _hideWhenLocked.SetActive(false);
+            _lockScreenNotice.SetActive(true);
             _logo.SetActive(false);
             _menuToggleButton.SetActive(false);
             // Lower Brightness
@@ -1486,6 +1489,7 @@ public class JakesSBSVLC : MonoBehaviour
 
             // Show All UI when screen is unlocked
             _hideWhenLocked.SetActive(true);
+            _lockScreenNotice.SetActive(false);
             _logo.SetActive(true);
             _menuToggleButton.SetActive(true);
         }
