@@ -3,6 +3,7 @@ Shader "JakeDowns/SBSLeftEye"
     Properties
     {
         _MainTex ("Texture", 2D) = "black" {}
+        _AspectRatio ("Aspect Ratio", Range(0, 100)) = 1
     }
     SubShader
     {
@@ -39,6 +40,7 @@ Shader "JakeDowns/SBSLeftEye"
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
+            float2 _AspectRatio;
 
             v2f vert (appdata v)
             {
@@ -55,10 +57,22 @@ Shader "JakeDowns/SBSLeftEye"
                 // shift lookup x coordinate to sample just the left half of the texture           
                 coord.x = coord.x * 0.5;
 
+                // Calculate the UV offset based on the aspect ratio difference
+                float2 uvOffset = float2(0.0, 0.0); //
+
+                float inputAspectRatio = _AspectRatio;
+                float outputAspectRatio = _ScreenParams.x / _ScreenParams.y;
+                if (inputAspectRatio < 1.75)
+                {
+                    //uvOffset.x += (inputAspectRatio - outputAspectRatio) * 0.25;
+                }
+
+                // Sample the input texture using the adjusted UV coordinates
+                coord = coord + uvOffset;
+
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, coord.xy);
-                // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
+                
                 return col;
             }
             ENDCG

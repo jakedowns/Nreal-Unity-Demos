@@ -20,6 +20,8 @@ public class JakesRemoteController : MonoBehaviour
     GameObject _custom_popup = null;
     GameObject _custom_ar_popup;
 
+    GameObject _picture_settings_popup = null;
+
     bool _og_menu_visible = true;
     bool _app_menu_visible = false;
     bool _popup_visible = false;
@@ -43,7 +45,8 @@ public class JakesRemoteController : MonoBehaviour
     {
         CUSTOM_AR_POPUP,
         MODE_LOCKED,
-        CUSTOM_POPUP
+        CUSTOM_POPUP,
+        PICTURE_SETTINGS_POPUP
     }
 
     PopupID[] popupStack;  
@@ -354,6 +357,35 @@ public class JakesRemoteController : MonoBehaviour
     {
         _custom_ar_popup_visible = true;
         _custom_ar_popup.SetActive(true);
+
+        UpdateCustomARPopupValuePreviewText();
+
+        // split and parse float
+        string[] split = jakesSBSVLC.GetCurrentAR().Split(':');
+        float ar_width = float.Parse(split[0]);
+        float ar_height = float.Parse(split[1]);
+
+        float ar_combo = ar_width / ar_height;
+
+        // set sliders to current value
+        _custom_ar_popup.transform.Find("ARWidthBar").GetComponent<Slider>().value = ar_width;
+        _custom_ar_popup.transform.Find("ARHeightBar").GetComponent<Slider>().value = ar_height;
+        _custom_ar_popup.transform.Find("ARComboBar").GetComponent<Slider>().value = ar_combo;
+    }
+
+    public void UpdateCustomARPopupValuePreviewText()
+    {
+        GameObject.Find("ARValuePreview").GetComponent<Text>().text = jakesSBSVLC.GetCurrentAR();
+
+        // split and parse float
+        string[] split = jakesSBSVLC.GetCurrentAR().Split(':');
+        float ar_width = float.Parse(split[0]);
+        float ar_height = float.Parse(split[1]);
+
+        float ar_combo = ar_width / ar_height;
+        ar_combo = Mathf.Round(ar_combo * 100f) / 100f;
+
+        GameObject.Find("ARValuePreviewDecimal").GetComponent<Text>().text = ar_combo.ToString();
     }
 
     public void ApplyCustomARPopup()

@@ -144,15 +144,18 @@ public class JakesSBSVLC : MonoBehaviour
     public Material m_leftEyeTBMaterial;
     public Material m_rightEyeTBMaterial;
 
-    public Material m_leftEye360Material;
-    public Material m_rightEye360Material;
+    // deprecated
+    /*public Material m_leftEye360Material;
+    public Material m_rightEye360Material;*/
 
+    // deprecated
     // TODO: combine 180 and 360 into 2 materials instead of 4?
-    public Material m_leftEye180Material;
-    public Material m_rightEye180Material;
+    /*public Material m_leftEye180Material;
+    public Material m_rightEye180Material;*/
 
-    public Material m_3602DSphericalMaterial;
-    public Material m_1802DSphericalMaterial;
+    // deprecated
+    /*public Material m_3602DSphericalMaterial;
+    public Material m_1802DSphericalMaterial;*/
 
     /// <summary> The NRInput. </summary>
     [SerializeField]
@@ -171,14 +174,13 @@ public class JakesSBSVLC : MonoBehaviour
     bool _3DModeLocked = true;
 
     int _3DTrialPlaybackStartedAt = 0;
-    float _MaxTrialPlaybackSeconds = 5.0f; //15.0f;
+    float _MaxTrialPlaybackSeconds = 15.0f;
     bool _isTrialing3DMode = false;
 
     float _aspectRatio;
     bool m_updatedARSinceOpen = false;
-
-    // TODO: support overriding the current aspect ratio
     float _aspectRatioOverride;
+    string _currentARString;
 
     /// <summary> The previous position. </summary>
     private Vector2 m_PreviousPos;
@@ -239,6 +241,11 @@ public class JakesSBSVLC : MonoBehaviour
         if (nrealFOVBar is not null)
         {
             nrealFOVBar.value = nreal_fov;
+        }
+
+        if (deformBar is not null)
+        {
+            deformBar.value = 0.0f;
         }
 
         _plane2SphereSet = GameObject.Find("NewDisplay");
@@ -372,15 +379,15 @@ public class JakesSBSVLC : MonoBehaviour
         SetVideoMode3602D();
     }
 
-    public void ToggleSphere()
+    /*public void ToggleSphere()
     {
         _360Sphere.SetActive(!_360Sphere.activeSelf);
-    }
+    }*/
 
-    public void ToggleSBSDisplay()
+    /*public void ToggleSBSDisplay()
     {
         _2DDisplaySet.SetActive(!_2DDisplaySet.activeSelf);
-    }
+    }*/
 
     public void OnScaleSliderUpdated()
     {
@@ -749,6 +756,8 @@ public class JakesSBSVLC : MonoBehaviour
         _cone?.SetActive(false); // hide cone logo
         _pointLight?.SetActive(false);
 
+        _plane2SphereSet?.SetActive(true);
+
         mediaPlayer.Play();
 
         CheckTrialExceeded();
@@ -764,6 +773,8 @@ public class JakesSBSVLC : MonoBehaviour
     {
         Log("VLCPlayerExample Stop");
         mediaPlayer?.Stop();
+
+        _plane2SphereSet.SetActive(false);
 
         // TODO: encapsulate this
         if (m_lRenderer?.material is not null)
@@ -783,6 +794,7 @@ public class JakesSBSVLC : MonoBehaviour
         _cone?.SetActive(true);
         _pointLight?.SetActive(true);
 
+        
 
         // clear to black
         _vlcTexture = null;
@@ -1009,21 +1021,24 @@ public class JakesSBSVLC : MonoBehaviour
                 m_updatedARSinceOpen = true;
                 _aspectRatio = (float)texture.width / (float)texture.height;
                 Debug.Log($"[SBSVLC] aspect ratio {_aspectRatio}");
-                mediaPlayer.AspectRatio = $"{texture.width}:{texture.height}";
+                _currentARString = $"{texture.width}:{texture.height}";
+                mediaPlayer.AspectRatio = _currentARString;
+                
 
 
             }
 
             if (m_lRenderer != null)
                 m_lRenderer.material.mainTexture = texture;
+            
             if (m_rRenderer != null)
                 m_rRenderer.material.mainTexture = texture;
 
-            if (m_l360Renderer != null)
+            /*if (m_l360Renderer != null)
                 m_l360Renderer.material.mainTexture = texture;
 
             if (m_r360Renderer != null)
-                m_r360Renderer.material.mainTexture = texture;
+                m_r360Renderer.material.mainTexture = texture;*/
         }
     }
 
@@ -1045,6 +1060,29 @@ public class JakesSBSVLC : MonoBehaviour
     {
         _flipStereo = !_flipStereo;
         SetVideoMode(_videoMode);
+    }
+
+    public string GetCurrentAR()
+    {
+        return _currentARString;
+    }
+
+    public void SetCurrentAR(string currentARString)
+    {
+        _currentARString = currentARString;
+        mediaPlayer.AspectRatio = _currentARString;
+
+        string[] split = _currentARString.Split(':');
+        float ar_width = float.Parse(split[0]);
+        float ar_height = float.Parse(split[1]);
+        float ar_float = ar_width / ar_height;
+
+        if (m_lMaterial is not null)
+            m_lMaterial.SetFloat("AspectRatio", ar_float);
+
+        // todo: make a combined shader?
+        if (m_rMaterial is not null)
+            m_rMaterial.SetFloat("AspectRatio", ar_float);
     }
 
     public bool GetExceededTrial()
@@ -1070,7 +1108,7 @@ public class JakesSBSVLC : MonoBehaviour
 
         Debug.Log("CheckTrialExceeded trialExceeded?" + trialExceeded);
         Debug.Log("CheckTrialExceeded video mode?" + _videoMode);
-        bool deformedPastFlat = deformBar is null ? true : deformBar.value > 0.1;
+        bool deformedPastFlat = deformBar is null ? false : deformBar.value > 0.1;
         Debug.Log("CheckTrialExceeded deformedPastFlat? " + deformBar?.value);
 
         if (_videoMode == VideoMode._180_3D || _videoMode == VideoMode._360_3D || deformedPastFlat)
@@ -1084,7 +1122,7 @@ public class JakesSBSVLC : MonoBehaviour
             } 
             else
             {
-                if(_3DTrialPlaybackStartedAt == 0){
+                if(_3DTrialPlaybackStartedAt == 0 && mediaPlayer.IsPlaying){
                     _3DTrialPlaybackStartedAt = cur_time;
                     _isTrialing3DMode = true;
                 }
@@ -1136,22 +1174,22 @@ public class JakesSBSVLC : MonoBehaviour
 
             if(mode == VideoMode._360_3D)
             {
-                _morphDisplayLeftRenderer.material = _flipStereo ? m_rightEye360Material : m_leftEye360Material;
-                _morphDisplayRightRenderer.material = _flipStereo ? m_leftEye360Material : m_rightEye360Material;
+                _morphDisplayLeftRenderer.material = _flipStereo ? m_rMaterial : m_lMaterial;
+                _morphDisplayRightRenderer.material = _flipStereo ? m_lMaterial : m_rMaterial;
 
             }
             else if(mode == VideoMode._360_2D)
             {
-                _morphDisplayLeftRenderer.material = m_3602DSphericalMaterial;
+                _morphDisplayLeftRenderer.material = m_lMaterial;
             }
             else if(mode == VideoMode._180_3D)
             {
-                _morphDisplayLeftRenderer.material = _flipStereo ? m_rightEye180Material : m_leftEye180Material;
-                _morphDisplayRightRenderer.material = _flipStereo ? m_leftEye180Material : m_rightEye180Material;
+                _morphDisplayLeftRenderer.material = _flipStereo ? m_rMaterial : m_lMaterial;
+                _morphDisplayRightRenderer.material = _flipStereo ? m_lMaterial : m_rMaterial;
             }
             else if(mode == VideoMode._180_2D)
             {
-                _morphDisplayLeftRenderer.material = m_1802DSphericalMaterial;
+                _morphDisplayLeftRenderer.material = m_monoMaterial;
                 
             }
 

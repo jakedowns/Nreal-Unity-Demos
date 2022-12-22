@@ -21,7 +21,7 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
     public JakesSBSVLC jakesSBSVLC;
     bool m_UseAppleStoreKitTestCertificate = false;
 
-    string _3DModeProductID = "com.jakedowns.vlc3d.180_360_3d_mode";
+    const string _3DModeProductID = "com.jakedowns.vlc3d.180_360_3d_mode";
 
     public MyIAPHandler()
     {
@@ -39,6 +39,10 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
     {
         InitPurchasing();
     }
+
+    // TODO: SetServiceDisconnectAtInitializeListener 
+    // TODO: SetQueryProductDetailsFailedListener 
+    // https://forum.unity.com/threads/unable-to-process-purchase-with-transaction-id.1366257/#post-8631087
 
     async void InitPurchasing()
     {
@@ -213,7 +217,7 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
     {
         switch (product.definition.id)
         {
-            case "com.jakedowns.vlc3d.180_360_3D_mode":
+            case _3DModeProductID:
                 jakesRemoteController.HideLockedPopup();
                 jakesRemoteController.ShowCustomPopup("Thank You", "You now have unlimited 3D playback of 180 and 360 videos. Enjoy!");
                 jakesRemoteController.Unlock3DMode();
