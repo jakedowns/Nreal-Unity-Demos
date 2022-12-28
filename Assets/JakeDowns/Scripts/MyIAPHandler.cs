@@ -218,7 +218,7 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
         switch (product.definition.id)
         {
             case _3DModeProductID:
-                jakesRemoteController.HideLockedPopup();
+                jakesRemoteController.HideUnlock3DSphereModePropmptPopup();
                 jakesRemoteController.ShowCustomPopup("Thank You", "You now have unlimited 3D playback of 180 and 360 videos. Enjoy!");
                 jakesRemoteController.Unlock3DMode();
                 jakesSBSVLC.Unlock3DMode();

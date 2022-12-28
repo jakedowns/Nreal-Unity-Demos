@@ -3,32 +3,30 @@ using NRKernal;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class JakesRemoteController : MonoBehaviour
 {
-    bool _menu_visible = false;
+    /*bool _menu_visible = false;*/
 
     JakesSBSVLC jakesSBSVLC;
 
     GameObject _menuPanel = null;
     GameObject _og_menu = null;
     GameObject _app_menu = null;
-    GameObject _my_popup = null;
+    GameObject _unlock_3d_sphere_mode_prompt_popup = null;
     GameObject _menu_toggle_button = null;
     GameObject _options_button = null;
     GameObject _custom_popup = null;
-    GameObject _custom_ar_popup;
+    GameObject _aspect_popup;
     GameObject _lockScreenNotice = null;
-
+    GameObject _display_popup = null;
+    GameObject _format_popup = null;
     GameObject _picture_settings_popup = null;
 
     bool _og_menu_visible = true;
-    bool _app_menu_visible = false;
-    bool _popup_visible = false;
-    bool _custom_popup_visible = false;
-    private bool _custom_ar_popup_visible;
 
     MenuID _visible_menu_id;
 
@@ -48,7 +46,10 @@ public class JakesRemoteController : MonoBehaviour
         CUSTOM_AR_POPUP,
         MODE_LOCKED,
         CUSTOM_POPUP,
-        PICTURE_SETTINGS_POPUP
+        PICTURE_SETTINGS_POPUP,
+        FILE_FORMAT_POPUP,
+        DISPLAY_SETTINGS_POPUP,
+        COLOR_POPUP
     }
 
     PopupID[] popupStack;  
@@ -84,13 +85,13 @@ public class JakesRemoteController : MonoBehaviour
         string versionCode = Application.buildGUID;
         GameObject.Find("AppMenu/AppMenuInner/Subtitle").GetComponent<Text>().text = $"{versionName} ({versionCode})";
 
-        // center things that i had spread out in Editor
-        SetTransformX(_menuPanel, 0);
-        SetTransformX(_app_menu, 0.0f);
-        SetTransformX(_my_popup, 0.0f);
-        SetTransformX(_custom_popup, 0.0f);
-        SetTransformX(_custom_ar_popup, 0.0f);
-        SetTransformX(_lockScreenNotice, 0.0f);
+        // center UI things that i had spread out in Editor
+        CenterPopupLocations();
+
+        // Center Menus/Objects
+        CenterXY(_lockScreenNotice);
+        CenterXY(_menuPanel);
+        CenterXY(_app_menu);
 
         _lockScreenNotice.SetActive(false);
 
@@ -100,9 +101,26 @@ public class JakesRemoteController : MonoBehaviour
         ShowOGMenu();
     }
 
-    void SetTransformX(GameObject o, float n)
+    void CenterPopupLocations()
     {
-        o.transform.localPosition = new Vector3(n, o.transform.localPosition.y, o.transform.localPosition.z);
+        // Get the "Popups" game object, then loop over each of it's top-level children
+        // and center them on the screen
+        GameObject popups = GameObject.Find("Canvas/Popups");
+        for (int i = 0; i < popups.transform.childCount; i++)
+        {
+            GameObject childGameObject = popups.transform.GetChild(i).gameObject;
+            //Debug.Log("centering " + childGameObject.name);
+            CenterXY(childGameObject);
+        }
+    }
+
+    void CenterXY(GameObject o)
+    {
+        o.transform.localPosition = new Vector3(
+            0.0f,
+            0.0f,
+            o.transform.localPosition.z
+        );
     }
 
     public static GameObject[] FindGameObjectsAll(string name)
@@ -152,14 +170,20 @@ public class JakesRemoteController : MonoBehaviour
 
     public void UpdateReferences()
     {
+        _menu_toggle_button = FindGameObjectsAllFirst("MenuToggleButton");
+        
         _menuPanel = FindGameObjectsAllFirst("MyControlPanel");
         _og_menu = FindGameObjectsAllFirst("BaseButtons");
         _app_menu = FindGameObjectsAllFirst("AppMenu");
-        _my_popup = FindGameObjectsAllFirst("MyPopup");
-        _menu_toggle_button = FindGameObjectsAllFirst("MenuToggleButton");
+        
+        _unlock_3d_sphere_mode_prompt_popup = FindGameObjectsAllFirst("Unlock3DSphereModePopup");
+        
         _custom_popup = FindGameObjectsAllFirst("CustomPopup");
-        _custom_ar_popup = FindGameObjectsAllFirst("CustomARPopup");
+        _aspect_popup = FindGameObjectsAllFirst("AspectRatioPopup");
         _options_button = FindGameObjectsAllFirst("OptionsButton");
+        _display_popup = FindGameObjectsAllFirst("DisplayPopup");
+        _format_popup = FindGameObjectsAllFirst("FormatPopup");
+        _picture_settings_popup = FindGameObjectsAllFirst("PictureSettingsPopup");
     }
 
     public void ShowOGMenu()
@@ -180,8 +204,7 @@ public class JakesRemoteController : MonoBehaviour
         UpdateReferences();
         
         _app_menu.SetActive(true);
-        _app_menu_visible = true;
-        SetTransformX(_app_menu, 0.0f);
+        CenterXY(_app_menu);
 
         _menu_toggle_button.SetActive(false);
     }
@@ -191,13 +214,11 @@ public class JakesRemoteController : MonoBehaviour
     public void HideAppMenu()
     {
         _app_menu.SetActive(false);
-        _app_menu_visible = false;
     }
 
-    public void ShowLockedPopup()
+    public void ShowUnlock3DSphereModePropmptPopup()
     {
-        _my_popup.SetActive(true);
-        _popup_visible = true;
+        _unlock_3d_sphere_mode_prompt_popup.SetActive(true);
 
         stateBeforePopup = new UIStateBeforeCustomPopup(_visible_menu_id);
 
@@ -214,10 +235,9 @@ public class JakesRemoteController : MonoBehaviour
         stateBeforePopup = null;
     }
 
-    public void HideLockedPopup()
+    public void HideUnlock3DSphereModePropmptPopup()
     {
-        _my_popup.SetActive(false);
-        _popup_visible = false;
+        _unlock_3d_sphere_mode_prompt_popup.SetActive(false);
 
         RestoreStateBeforePopup();
     }
@@ -245,7 +265,6 @@ public class JakesRemoteController : MonoBehaviour
 
     public void ShowControllerMenu()
     {
-        _menu_visible = true;
         _menuPanel?.SetActive(true);
 
         _options_button.SetActive(true);
@@ -254,7 +273,6 @@ public class JakesRemoteController : MonoBehaviour
 
     public void HideControllerMenu()
     {
-        _menu_visible = false;
         _menuPanel?.SetActive(false);
     }
 
@@ -325,9 +343,13 @@ public class JakesRemoteController : MonoBehaviour
 
     public void HideAllPopups()
     {
-        HideLockedPopup();
+        // TODO: just loop
+        HideUnlock3DSphereModePropmptPopup();
         HideCustomPopup();
         HideCustomARPopup();
+        HideDisplayPopup();
+        HideFormatPopup();
+        HidePopupByID(PopupID.PICTURE_SETTINGS_POPUP);
     }
 
     public void ShowPopupByID(PopupID popupID)
@@ -338,7 +360,7 @@ public class JakesRemoteController : MonoBehaviour
         switch (popupID)
         {
             case PopupID.MODE_LOCKED:
-                ShowLockedPopup();
+                ShowUnlock3DSphereModePropmptPopup();
                 break;
             /*case PopupID.CUSTOM:
                 ShowCustomPopup();
@@ -354,7 +376,7 @@ public class JakesRemoteController : MonoBehaviour
         switch (popupID)
         {
             case PopupID.MODE_LOCKED:
-                HideLockedPopup();
+                HideUnlock3DSphereModePropmptPopup();
                 break;
             /*case PopupID.CUSTOM:
                 HideCustomPopup();
@@ -362,14 +384,16 @@ public class JakesRemoteController : MonoBehaviour
             case PopupID.CUSTOM_AR_POPUP:
                 HideCustomARPopup();
                 break;
+            case PopupID.PICTURE_SETTINGS_POPUP:
+                HidePictureSettingsPopup();
+                break;
         }
         RestoreStateBeforePopup();
     }
 
     public void ShowCustomARPopup()
     {
-        _custom_ar_popup_visible = true;
-        _custom_ar_popup.SetActive(true);
+        _aspect_popup.SetActive(true);
 
         UpdateCustomARPopupValuePreviewText();
 
@@ -381,9 +405,9 @@ public class JakesRemoteController : MonoBehaviour
         float ar_combo = ar_width / ar_height;
 
         // set sliders to current value
-        _custom_ar_popup.transform.Find("ARWidthBar").GetComponent<Slider>().value = ar_width;
-        _custom_ar_popup.transform.Find("ARHeightBar").GetComponent<Slider>().value = ar_height;
-        _custom_ar_popup.transform.Find("ARComboBar").GetComponent<Slider>().value = ar_combo;
+        _aspect_popup.transform.Find("ARWidthBar").GetComponent<Slider>().value = ar_width;
+        _aspect_popup.transform.Find("ARHeightBar").GetComponent<Slider>().value = ar_height;
+        _aspect_popup.transform.Find("ARComboBar").GetComponent<Slider>().value = ar_combo;
     }
 
     public void UpdateCustomARPopupValuePreviewText()
@@ -404,21 +428,19 @@ public class JakesRemoteController : MonoBehaviour
     public void ApplyCustomARPopup()
     {
         HidePopupByID(PopupID.CUSTOM_AR_POPUP);
-        string requested_value = _custom_ar_popup.transform.Find("ARTextInput").GetComponent<InputField>().text;
+        string requested_value = _aspect_popup.transform.Find("ARTextInput").GetComponent<InputField>().text;
         jakesSBSVLC.SetAspectRatio(requested_value);
     }
 
     public void HideCustomARPopup()
     {
-        _custom_ar_popup_visible = false;
-        _custom_ar_popup.SetActive(false);
+        _aspect_popup.SetActive(false);
     }
 
     public void ShowCustomPopup(string title, string body)
     {
         stateBeforePopup = new UIStateBeforeCustomPopup(_visible_menu_id);
         UpdateReferences();
-        _popup_visible = true;
         _custom_popup.SetActive(true);
         _custom_popup.transform.position = new Vector3(
             _custom_popup.transform.position.x,
@@ -431,9 +453,38 @@ public class JakesRemoteController : MonoBehaviour
 
     public void HideCustomPopup()
     {
-        _popup_visible = false;
         _custom_popup.SetActive(false);
         RestoreStateBeforePopup();
+    }
+
+    public void ShowDisplayPopup()
+    {
+        _display_popup.SetActive(true);
+    }
+
+    public void HideDisplayPopup()
+    {
+        _display_popup.SetActive(false);
+    }
+
+    public void ShowFormatPopup()
+    {
+        _format_popup.SetActive(true);
+    }
+
+    public void HideFormatPopup()
+    {
+        _format_popup.SetActive(false);
+    }
+
+    public void ShowPictureSettingsPopup()
+    {
+        _picture_settings_popup.SetActive(true);
+    }
+
+    public void HidePictureSettingsPopup()
+    {
+        _picture_settings_popup.SetActive(false);
     }
 
     // Flag UI as unlocked

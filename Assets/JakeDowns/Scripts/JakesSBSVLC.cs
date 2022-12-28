@@ -559,7 +559,7 @@ public class JakesSBSVLC : MonoBehaviour
             Debug.LogWarning("camera null " + $" {LeftCamera}, {CenterCamera}, {RightCamera}");
             return;
         }
-        Debug.Log("fov before: " + LeftCamera.fieldOfView + ", " + CenterCamera.fieldOfView + ", " + RightCamera.fieldOfView);
+        //Debug.Log("fov before: " + LeftCamera.fieldOfView + ", " + CenterCamera.fieldOfView + ", " + RightCamera.fieldOfView);
 
         nreal_fov = (float)nrealFOVBar.value;
 
@@ -567,11 +567,11 @@ public class JakesSBSVLC : MonoBehaviour
         CenterCamera.fieldOfView = nreal_fov;
         RightCamera.fieldOfView = nreal_fov;
 
-        Debug.Log("fov after: " + LeftCamera.fieldOfView + ", " + CenterCamera.fieldOfView + ", " + RightCamera.fieldOfView);
+        //Debug.Log("fov after: " + LeftCamera.fieldOfView + ", " + CenterCamera.fieldOfView + ", " + RightCamera.fieldOfView);
 
         Do360Navigation();
 
-        Debug.Log("fov after 360 nav" + LeftCamera.fieldOfView + ", " + CenterCamera.fieldOfView + ", " + RightCamera.fieldOfView);
+        //Debug.Log("fov after 360 nav" + LeftCamera.fieldOfView + ", " + CenterCamera.fieldOfView + ", " + RightCamera.fieldOfView);
     }
     public void SetVideoMode1802D()
     {
@@ -1127,7 +1127,7 @@ public class JakesSBSVLC : MonoBehaviour
         {
             if (trialExceeded)
             {
-                jakesRemoteController.ShowLockedPopup();
+                jakesRemoteController.ShowUnlock3DSphereModePropmptPopup();
                 _videoMode = VideoMode.SBSHalf;
                 Debug.Log("CheckTrialExceeded PAUSE!!!");
                 Pause();
@@ -1143,155 +1143,63 @@ public class JakesSBSVLC : MonoBehaviour
         return trialExceeded;
     }
 
+    public void ClearMaterialTextureLinks()
+    {
+        if (_morphDisplayLeftRenderer.material is not null)
+        {
+            _morphDisplayLeftRenderer.material.mainTexture = null;
+            _morphDisplayLeftRenderer.material = null;
+        }
+
+        if (_morphDisplayRightRenderer.material is not null)
+        {
+            _morphDisplayRightRenderer.material.mainTexture = null;
+            _morphDisplayRightRenderer.material = null;
+        }
+    }
+
     public void SetVideoMode(VideoMode mode)
     {
         _videoMode = mode;
         CheckTrialExceeded();
         Debug.Log($"[JakeDowns] set video mode {mode}");
 
-        if(_plane2SphereLeftEye is not null)
+        flipTextureX = false;
+
+        ClearMaterialTextureLinks();
+
+        if(mode == VideoMode.Mono || mode == VideoMode._360_2D || mode == VideoMode._180_2D)
         {
-            _plane2SphereLeftEye.GetComponent<Renderer>().material = m_monoMaterial;
-            _plane2SphereLeftEye.GetComponent<Renderer>().material.mainTexture = texture;
-        }
+            // 2D
+            _plane2SphereLeftEye.layer = LayerMask.NameToLayer("Default");
+            _plane2SphereRightEye.SetActive(false);
 
-        if(_plane2SphereRightEye is not null)
-        {
-            _plane2SphereRightEye.GetComponent<Renderer>().material = m_monoMaterial;
-            _plane2SphereRightEye.GetComponent<Renderer>().material.mainTexture = texture;
-        }
-
-        if (Array.IndexOf(_SphericalModes, mode) > -1)
-        {
-            flipTextureX = false;// true;          
-
-            /* TOGGLE VISIBILITY */
-            if(mode == VideoMode._360_2D || mode == VideoMode._180_2D)
-            {
-                // 2D
-                _plane2SphereLeftEye.layer = LayerMask.NameToLayer("Default");
-                _plane2SphereRightEye.SetActive(false);
-            }
-            else
-            {
-                // 3D
-
-                _plane2SphereLeftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
-
-                _plane2SphereRightEye.SetActive(true);
-                _plane2SphereRightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
-            }
-
-            /* SET MATERIALS */
-
-            if(mode == VideoMode._360_3D)
-            {
-                _morphDisplayLeftRenderer.material = _flipStereo ? m_rMaterial : m_lMaterial;
-                _morphDisplayRightRenderer.material = _flipStereo ? m_lMaterial : m_rMaterial;
-
-            }
-            else if(mode == VideoMode._360_2D)
-            {
-                _morphDisplayLeftRenderer.material = m_lMaterial;
-            }
-            else if(mode == VideoMode._180_3D)
-            {
-                _morphDisplayLeftRenderer.material = _flipStereo ? m_rMaterial : m_lMaterial;
-                _morphDisplayRightRenderer.material = _flipStereo ? m_lMaterial : m_rMaterial;
-            }
-            else if(mode == VideoMode._180_2D)
-            {
-                _morphDisplayLeftRenderer.material = m_monoMaterial;
-                
-            }
-
-            /* SET TEXTURE */
-            if(mode == VideoMode._360_2D || mode == VideoMode._180_2D)
-            {
-                // 2D
-                _morphDisplayLeftRenderer.material.mainTexture = texture;
-                _morphDisplayRightRenderer.material = null;
-            }
-            else
-            {
-                // 3D
-                _morphDisplayLeftRenderer.material.mainTexture = texture;
-                _morphDisplayRightRenderer.material.mainTexture = texture;
-            }
+            _morphDisplayLeftRenderer.material = m_lMaterial;
+            _morphDisplayLeftRenderer.material.mainTexture = texture;
         }
         else
         {
-            flipTextureX = false;
-            
-            /*fov = 20.0f;
-            if (LeftCamera is not null)
-                LeftCamera.fieldOfView = 20;
+            // 3D
 
-            if (CenterCamera is not null)
-                CenterCamera.fieldOfView = 20;
-            
-            if (RightCamera is not null)
-                RightCamera.fieldOfView = 20;*/
+            _plane2SphereLeftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
 
-            // TODO: set 360 material mainTextures to null to save battery
-            /*Debug.Log("setting sphere inactive");
-            _360Sphere.SetActive(false);
-            _2DDisplaySet.SetActive(true);*/
+            _plane2SphereRightEye.SetActive(true);
+            _plane2SphereRightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
 
-            if (mode is VideoMode.SBSHalf or VideoMode.SBSFull)
+            if (mode is VideoMode.TB)
             {
-                _plane2SphereRightEye.SetActive(true);
-                
-                _morphDisplayLeftRenderer.material = _flipStereo ? m_rMaterial : m_lMaterial;
-                _morphDisplayRightRenderer.material = _flipStereo ? m_lMaterial : m_rMaterial;
-                _plane2SphereLeftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
-                _plane2SphereRightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
-            }
-            else if (mode is VideoMode.Mono)
-            {
-                _plane2SphereRightEye.SetActive(false);
-
-                _morphDisplayLeftRenderer.material = m_monoMaterial;
-                _plane2SphereLeftEye.layer = LayerMask.NameToLayer("Default");
-            }
-            else if (mode is VideoMode.TB)
-            {
-                _plane2SphereRightEye.SetActive(true);
-                _morphDisplayLeftRenderer.material = m_leftEyeTBMaterial;
-                _morphDisplayRightRenderer.material = m_rightEyeTBMaterial;
-                _plane2SphereLeftEye.layer = LayerMask.NameToLayer("LeftEyeOnly");
-                _plane2SphereRightEye.layer = LayerMask.NameToLayer("RightEyeOnly");
-                
-            }
-
-            if (_morphDisplayLeftRenderer != null)
-                _morphDisplayLeftRenderer.material.mainTexture = texture;
-            
-            if (_morphDisplayRightRenderer != null)
-                _morphDisplayRightRenderer.material.mainTexture = texture;
-        }
-
-        /*if (_vlcTexture is not null)
-        {
-            if (mode == VideoMode.Mono || mode == VideoMode._180_2D || mode == VideoMode._360_2D)
-            {
-                // 2D
-                mediaPlayer.AspectRatio = $"{_vlcTexture.width}:{_vlcTexture.height}";
+                _morphDisplayLeftRenderer.material = _flipStereo ? m_rightEyeTBMaterial : m_leftEyeTBMaterial;
+                _morphDisplayRightRenderer.material = _flipStereo ? m_leftEyeTBMaterial : m_rightEyeTBMaterial;
             }
             else
             {
-                // SBS
-                mediaPlayer.AspectRatio = $"{_vlcTexture.width / 2}:{_vlcTexture.height}";
-                if (mode == VideoMode.TB)
-                {
-                    mediaPlayer.AspectRatio = $"{_vlcTexture.width}:{_vlcTexture.height / 2}";
-                }
+                _morphDisplayLeftRenderer.material = _flipStereo ? m_rMaterial : m_lMaterial;
+                _morphDisplayRightRenderer.material = _flipStereo ? m_lMaterial : m_rMaterial;
             }
-        }*/
-        
-        //fovBar.value = fov;
-        //OnFOVSliderUpdated();
 
+            _morphDisplayLeftRenderer.material.mainTexture = texture;
+            _morphDisplayRightRenderer.material.mainTexture = texture;
+        }
         
     }
 
