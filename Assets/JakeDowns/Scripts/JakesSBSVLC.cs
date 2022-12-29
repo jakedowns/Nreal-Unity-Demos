@@ -10,6 +10,8 @@ using Application = UnityEngine.Device.Application;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 using NRKernal;
 using System.Collections;
+using System.Diagnostics.Contracts;
+//using UnityEngine.PostProcessing;
 //using static JakesSBSVLC;
 //using static UnityEditor.Experimental.GraphView.GraphView;
 
@@ -48,6 +50,9 @@ public class JakesSBSVLC : MonoBehaviour
     Camera CenterCamera;
     Camera RightCamera;
 
+    float leftCameraXOnStart;
+    float rightCameraXOnStart;
+
     [SerializeField]
     public MyIAPHandler myIAPHandler;
 
@@ -82,21 +87,22 @@ public class JakesSBSVLC : MonoBehaviour
     [SerializeField]
     public UnityEngine.UI.Slider deformBar;
 
-    /*[SerializeField]
+    [SerializeField]
     public UnityEngine.UI.Slider brightnessBar;
 
     [SerializeField]
     public UnityEngine.UI.Slider contrastBar;
 
     [SerializeField]
+    public UnityEngine.UI.Slider gammaBar;
+
+    /*
+    [SerializeField]
     public UnityEngine.UI.Slider saturationBar;
 
     [SerializeField]
     public UnityEngine.UI.Slider hueBar;
-
-    [SerializeField]
-    public UnityEngine.UI.Slider gammaBar;
-
+    
     [SerializeField]
     public UnityEngine.UI.Slider sharpnessBar;*/
 
@@ -105,6 +111,9 @@ public class JakesSBSVLC : MonoBehaviour
 
     [SerializeField]
     public UnityEngine.UI.Slider verticalBar;
+
+    [SerializeField]
+    public UnityEngine.UI.Slider depthBar;
 
     GameObject _cone;
     GameObject _pointLight;
@@ -262,6 +271,10 @@ public class JakesSBSVLC : MonoBehaviour
         jakesRemoteController.SetJakesSBSVLC(this);
 
         UpdateCameraReferences();
+
+        leftCameraXOnStart = LeftCamera.transform.position.x;
+        rightCameraXOnStart = RightCamera.transform.position.x;
+
         // init
         OnFOVSliderUpdated();
         OnSplitFOVSliderUpdated();
@@ -316,6 +329,25 @@ public class JakesSBSVLC : MonoBehaviour
     {
         //Dispose of mediaPlayer, or it will stay in nemory and keep playing audio
         DestroyMediaPlayer();
+    }
+
+    void UpdateColorGrade()
+    {
+        // Get the Color Grading effect from the camera's post-processing profile
+        /*ColorGrading colorGrading;
+        if (camera.TryGetComponent(out PostProcessVolume volume))
+        {
+            volume.profile.TryGetSettings(out colorGrading);
+        }
+        else
+        {
+            return;
+        }*/
+
+        // Set the brightness, contrast, and gamma levels
+        /*colorGrading.brightness.value = brightnessBar.value;
+        colorGrading.contrast.value = contrastBar.value;
+        colorGrading.gamma.value = gammaBar.value;*/
     }
 
     void Update()
@@ -499,6 +531,20 @@ public class JakesSBSVLC : MonoBehaviour
         renderer.SetBlendShapeWeight(ShapeIndex, endValue);
     }
 
+    public void OnBrightnessSliderUpdated()
+    {
+        
+    }
+
+    public void OnGammaSliderUpdated()
+    {
+        
+    }
+
+    public void OnContrastSliderUpdated()
+    {
+    }
+
     public void OnDistanceSliderUpdated()
     {
         float newDistance = (float)distanceBar.value;
@@ -517,6 +563,31 @@ public class JakesSBSVLC : MonoBehaviour
     {
         float newOffset = (float)verticalBar.value;
         _plane2SphereSet.transform.localPosition = new Vector3(0.0f, newOffset, 0.0f);
+    }
+
+    public void ResetDisplayAdjustments()
+    {
+        _plane2SphereSet.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+        _plane2SphereSet.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+        
+    }
+
+    float leftCameraMinX = -0.5f;
+    float rightCameraMaxX = 0.5f;
+
+    public void OnDepthBarUpdated()
+    {
+        float newDepth = (float)depthBar.value;
+
+        // move left and right camera closer or further to each other depending on the depthbar value
+        // if the value is 0, the cameras are the min distance apart from each other on their local x axis (leftCameraXOnStart / rightCameraXOnStart)
+        // if the value is 100, the cameras are at the max distance apart from each other on their local x axis (leftCameraMinX / rightCameraMaxX)
+
+        float leftCameraX = Mathf.Lerp(leftCameraXOnStart, leftCameraMinX, newDepth / 100.0f);
+        float rightCameraX = Mathf.Lerp(rightCameraXOnStart, rightCameraMaxX, newDepth / 100.0f);
+
+        LeftCamera.transform.localPosition = new Vector3(leftCameraX, LeftCamera.transform.localPosition.y, LeftCamera.transform.localPosition.z);
+        RightCamera.transform.localPosition = new Vector3(rightCameraX, RightCamera.transform.localPosition.y, RightCamera.transform.localPosition.z);
     }
 
     public void OnFOVSliderUpdated()
@@ -668,7 +739,7 @@ public class JakesSBSVLC : MonoBehaviour
         float eighty_or_delta_x = absX > 0 ? absX * 10000 : 80;
         float eighty_or_delta_y = absY > 0 ? absY * 10000 : 80;
 
-        Debug.Log($"*80x {eighty_or_delta_x} 80y {eighty_or_delta_y} fov {fov} fov2 {nreal_fov}");
+        //Debug.Log($"*80x {eighty_or_delta_x} 80y {eighty_or_delta_y} fov {fov} fov2 {nreal_fov}");
 
         bool? result = null;
         try
@@ -694,7 +765,7 @@ public class JakesSBSVLC : MonoBehaviour
             Debug.LogWarning("error updating viewpoint " + e);
         }
 
-        Debug.Log("Update Viewpoint Result " + result.ToString());
+        //Debug.Log("Update Viewpoint Result " + result.ToString());
     }
 
     //Public functions that expose VLC MediaPlayer functions in a Unity-friendly way. You may want to add more of these.
