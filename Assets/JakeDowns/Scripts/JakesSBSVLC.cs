@@ -115,6 +115,9 @@ public class JakesSBSVLC : MonoBehaviour
     [SerializeField]
     public UnityEngine.UI.Slider depthBar;
 
+    [SerializeField]
+    public UnityEngine.UI.Slider focusBar;
+
     GameObject _cone;
     GameObject _pointLight;
 
@@ -572,8 +575,8 @@ public class JakesSBSVLC : MonoBehaviour
         
     }
 
-    float leftCameraMinX = -0.5f;
-    float rightCameraMaxX = 0.5f;
+    float leftCameraMinX = -1.5f;
+    float rightCameraMaxX = 1.5f;
 
     public void OnDepthBarUpdated()
     {
@@ -586,8 +589,24 @@ public class JakesSBSVLC : MonoBehaviour
         float leftCameraX = Mathf.Lerp(leftCameraXOnStart, leftCameraMinX, newDepth / 100.0f);
         float rightCameraX = Mathf.Lerp(rightCameraXOnStart, rightCameraMaxX, newDepth / 100.0f);
 
+        Debug.Log($"{newDepth} , {leftCameraX} , {rightCameraX}");
+
         LeftCamera.transform.localPosition = new Vector3(leftCameraX, LeftCamera.transform.localPosition.y, LeftCamera.transform.localPosition.z);
         RightCamera.transform.localPosition = new Vector3(rightCameraX, RightCamera.transform.localPosition.y, RightCamera.transform.localPosition.z);
+    }
+
+    static float maxFocal = 45.0f;
+    static float minFocal = -45.0f;
+
+    public void OnFocusBarUpdated()
+    {
+        float focus = (float)focusBar.value; // percentage 0-100
+
+        /* rotate the left and right camera ever so slightly so that the convergence plane / focus plane changes */
+        float focal = Mathf.Lerp(minFocal, maxFocal, focus / 100.0f);
+        LeftCamera.transform.localRotation = Quaternion.Euler(0.0f, focal, 0.0f);
+        RightCamera.transform.localRotation = Quaternion.Euler(0.0f, -focal, 0.0f);
+
     }
 
     public void OnFOVSliderUpdated()
