@@ -24,6 +24,7 @@ public class JakesRemoteController : MonoBehaviour
     GameObject _lockScreenNotice = null;
     GameObject _display_popup = null;
     GameObject _format_popup = null;
+    GameObject _whats_new_popup = null;
     GameObject _picture_settings_popup = null;
 
     bool _og_menu_visible = true;
@@ -49,14 +50,15 @@ public class JakesRemoteController : MonoBehaviour
         PICTURE_SETTINGS_POPUP,
         FILE_FORMAT_POPUP,
         DISPLAY_SETTINGS_POPUP,
-        COLOR_POPUP
+        COLOR_POPUP,
+        WHATS_NEW_POPUP
     }
 
-    PopupID[] popupStack;  
+    PopupID[] popupStack;
 
     public class UIStateBeforeCustomPopup
     {
-        public UIStateBeforeCustomPopup(MenuID _visible_menu_id) 
+        public UIStateBeforeCustomPopup(MenuID _visible_menu_id)
         {
             this.VisibleMenuID = _visible_menu_id;
         }
@@ -67,7 +69,7 @@ public class JakesRemoteController : MonoBehaviour
     {
         jakesSBSVLC = instance;
     }
-    
+
     // Start is called before the first frame update
     void Start()
     {
@@ -97,8 +99,19 @@ public class JakesRemoteController : MonoBehaviour
 
         HideAllMenus();
         HideAllPopups();
-        
+
         ShowOGMenu();
+
+        if (PlayerPrefs.GetInt("OnboardingSeen_0_0_5_g") == 1)
+        {
+            // The user has already seen the onboarding tutorial text
+        }
+        else
+        {
+            // The user has not yet seen the onboarding tutorial text
+            PlayerPrefs.SetInt("OnboardingSeen_0_0_5_g", 1);
+            ShowWhatsNewPopup();
+        }
     }
 
     void CenterPopupLocations()
@@ -171,19 +184,25 @@ public class JakesRemoteController : MonoBehaviour
     public void UpdateReferences()
     {
         _menu_toggle_button = FindGameObjectsAllFirst("MenuToggleButton");
-        
+
         _menuPanel = FindGameObjectsAllFirst("MyControlPanel");
         _og_menu = FindGameObjectsAllFirst("BaseButtons");
         _app_menu = FindGameObjectsAllFirst("AppMenu");
-        
+
         _unlock_3d_sphere_mode_prompt_popup = FindGameObjectsAllFirst("Unlock3DSphereModePopup");
-        
+
         _custom_popup = FindGameObjectsAllFirst("CustomPopup");
         _aspect_popup = FindGameObjectsAllFirst("AspectRatioPopup");
         _options_button = FindGameObjectsAllFirst("OptionsButton");
         _display_popup = FindGameObjectsAllFirst("DisplayPopup");
         _format_popup = FindGameObjectsAllFirst("FormatPopup");
+        _whats_new_popup = FindGameObjectsAllFirst("WhatsNewPopup");
         _picture_settings_popup = FindGameObjectsAllFirst("PictureSettingsPopup");
+    }
+
+    public void ClearPlayerPrefs()
+    {
+        PlayerPrefs.DeleteAll();
     }
 
     public void ShowOGMenu()
@@ -200,16 +219,16 @@ public class JakesRemoteController : MonoBehaviour
         _og_menu_visible = false;
     }
 
-    public void ShowAppMenu(){
+    public void ShowAppMenu() {
         UpdateReferences();
-        
+
         _app_menu.SetActive(true);
         CenterXY(_app_menu);
 
         _menu_toggle_button.SetActive(false);
     }
 
-    
+
 
     public void HideAppMenu()
     {
@@ -227,7 +246,7 @@ public class JakesRemoteController : MonoBehaviour
 
     public void RestoreStateBeforePopup()
     {
-        if(stateBeforePopup == null)
+        if (stateBeforePopup == null)
         {
             return;
         }
@@ -278,7 +297,7 @@ public class JakesRemoteController : MonoBehaviour
 
     public void UIToggleControllerMenu()
     {
-        if(_visible_menu_id == MenuID.CONTROLLER_MENU)
+        if (_visible_menu_id == MenuID.CONTROLLER_MENU)
         {
             ShowMenuByID(MenuID.OG_MENU);
         }
@@ -296,7 +315,7 @@ public class JakesRemoteController : MonoBehaviour
     {
         ShowMenuByID(MenuID.APP_MENU);
     }
-        
+
 
     public void ShowMenuByID(MenuID id)
     {
@@ -349,6 +368,7 @@ public class JakesRemoteController : MonoBehaviour
         HideCustomARPopup();
         HideDisplayPopup();
         HideFormatPopup();
+        HideWhatsNewPopup();
         HidePopupByID(PopupID.PICTURE_SETTINGS_POPUP);
     }
 
@@ -356,7 +376,7 @@ public class JakesRemoteController : MonoBehaviour
     {
         stateBeforePopup = new UIStateBeforeCustomPopup(_visible_menu_id);
         UpdateReferences();
-        
+
         switch (popupID)
         {
             case PopupID.MODE_LOCKED:
@@ -475,6 +495,15 @@ public class JakesRemoteController : MonoBehaviour
     public void HideFormatPopup()
     {
         _format_popup.SetActive(false);
+    }
+    public void ShowWhatsNewPopup()
+    {
+        _whats_new_popup.SetActive(true);
+    }
+
+    public void HideWhatsNewPopup()
+    {
+       _whats_new_popup.SetActive(false);
     }
 
     public void ShowPictureSettingsPopup()
