@@ -31,7 +31,7 @@ public class MyIAPHandler : MonoBehaviour, IStoreListener
     void Awake()
     {
         jakesRemoteController = GameObject.Find("VirtualController").GetComponent<JakesRemoteController>();
-        jakesSBSVLC = GameObject.Find("SBSDisplay").GetComponent<JakesSBSVLC>();
+        jakesSBSVLC = GameObject.Find("NewDisplay").GetComponent<JakesSBSVLC>();
     }
 
     // Start is called before the first frame update

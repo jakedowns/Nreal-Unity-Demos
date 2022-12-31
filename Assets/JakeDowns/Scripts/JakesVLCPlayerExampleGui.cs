@@ -168,7 +168,7 @@ public class JakesVLCPlayerExampleGui : MonoBehaviour
 		seekBarEvents.triggers.Add(seekBarPointerUp);
 
         // Scale Bar Events
-        var scaleBarEvents = scaleBar.GetComponent<EventTrigger>();
+        /*var scaleBarEvents = scaleBar.GetComponent<EventTrigger>();
 
         EventTrigger.Entry scaleBarPointerDown = new EventTrigger.Entry();
         scaleBarPointerDown.eventID = EventTriggerType.PointerDown;
@@ -182,7 +182,7 @@ public class JakesVLCPlayerExampleGui : MonoBehaviour
             GameObject.Find("SphereDisplay").transform.localScale = new Vector3(scaleBar.value, scaleBar.value, scaleBar.value);
         });
         scaleBarEvents.triggers.Add(scaleBarPointerUp);
-
+		*/
         // AR Width Bar Events
         var arWidthBarEvents = ARWidthBar.GetComponent<EventTrigger>();
 

@@ -285,19 +285,6 @@ public class JakesSBSVLC : MonoBehaviour
         _cone = GameObject.Find("CONE_PARENT");
         _pointLight = GameObject.Find("Point Light");
 
-        //_360Sphere = GameObject.Find("SphereDisplay");
-        /*if (_360Sphere is null)
-            Debug.LogError("SphereDisplay not found");
-        else
-            _360Sphere.SetActive(false);*/
-
-        //leftEyeSphere = _360Sphere.transform.Find("LeftEye").gameObject;
-        //rightEyeSphere = _360Sphere.transform.Find("RightEye").gameObject;
-        /*m_l360Renderer = leftEyeSphere.GetComponent<Renderer>();
-        m_r360Renderer = rightEyeSphere.GetComponent<Renderer>();*/
-
-        /*_2DDisplaySet = GameObject.Find("SBSDisplay/DisplaySet");*/
-
         // TODO: extract lockscreen logic into a separate script
         _hideWhenLocked = GameObject.Find("HideWhenScreenLocked");
         _lockScreenNotice = GameObject.Find("LockScreenNotice");
@@ -313,13 +300,12 @@ public class JakesSBSVLC : MonoBehaviour
         _morphDisplayLeftRenderer = _plane2SphereLeftEye.GetComponent<Renderer>();
         _morphDisplayRightRenderer = _plane2SphereRightEye.GetComponent<Renderer>();
 
-        // read material reference
-        //m_lMaterial = _morphDisplayLeftRenderer.material;
-        //m_rMaterial = _morphDisplayRightRenderer.material;
-
         //Automatically flip on android
         if (automaticallyFlipOnAndroid && UnityEngine.Application.platform == RuntimePlatform.Android)
             flipTextureY = !flipTextureY;
+
+        if (UnityEngine.Application.platform != RuntimePlatform.Android)
+            flipTextureX = !flipTextureX;
 
         SetVideoModeMono();
 
@@ -415,16 +401,6 @@ public class JakesSBSVLC : MonoBehaviour
         Open("https://streams.videolan.org/streams/360/kolor-balloon-icare-full-hd.mp4");
         SetVideoMode3602D();
     }
-
-    /*public void ToggleSphere()
-    {
-        _360Sphere.SetActive(!_360Sphere.activeSelf);
-    }*/
-
-    /*public void ToggleSBSDisplay()
-    {
-        _2DDisplaySet.SetActive(!_2DDisplaySet.activeSelf);
-    }*/
 
     public void OnScaleSliderUpdated()
     {
@@ -551,21 +527,33 @@ public class JakesSBSVLC : MonoBehaviour
     public void OnDistanceSliderUpdated()
     {
         float newDistance = (float)distanceBar.value;
-        _plane2SphereSet.transform.localPosition = new Vector3(0.0f, 0.0f, newDistance);
+        _plane2SphereSet.transform.localPosition = new Vector3(
+            _plane2SphereSet.transform.localPosition.x,
+            _plane2SphereSet.transform.localPosition.y, 
+            newDistance
+        );
     }
 
     /* Horizontal (X) axis offset for screen */
     public void OnHorizontalSliderUpdated()
     {
         float newOffset = (float)horizontalBar.value;
-        _plane2SphereSet.transform.localPosition = new Vector3(newOffset, 0.0f, 0.0f);
+        _plane2SphereSet.transform.localPosition = new Vector3(
+            newOffset,
+            _plane2SphereSet.transform.localPosition.y,
+            _plane2SphereSet.transform.localPosition.z
+        );
     }
 
     /* Vertical (Y) axis offset for screen */
     public void OnVerticalSliderUpdated()
     {
         float newOffset = (float)verticalBar.value;
-        _plane2SphereSet.transform.localPosition = new Vector3(0.0f, newOffset, 0.0f);
+        _plane2SphereSet.transform.localPosition = new Vector3(
+            _plane2SphereSet.transform.localPosition.x,
+            newOffset,
+            _plane2SphereSet.transform.localPosition.z
+        );
     }
 
     public void ResetDisplayAdjustments()
@@ -595,8 +583,8 @@ public class JakesSBSVLC : MonoBehaviour
         RightCamera.transform.localPosition = new Vector3(rightCameraX, RightCamera.transform.localPosition.y, RightCamera.transform.localPosition.z);
     }
 
-    static float maxFocal = 45.0f;
-    static float minFocal = -45.0f;
+    static float maxFocal = 15.0f;
+    static float minFocal = -15.0f;
 
     public void OnFocusBarUpdated()
     {
@@ -799,10 +787,13 @@ public class JakesSBSVLC : MonoBehaviour
     public void Open()
     {
         Log("VLCPlayerExample Open");
+        
         if (mediaPlayer?.Media != null)
             mediaPlayer.Media.Dispose();
 
-        var trimmedPath = path.Trim(new char[] { '"' });//Windows likes to copy paths with quotes but Uri does not like to open them
+        SetVideoModeMono();
+
+        var trimmedPath = path.Trim(new char[] { '"' }); //Windows likes to copy paths with quotes but Uri does not like to open them
         mediaPlayer.Media = new Media(new Uri(trimmedPath));
 
         Task.Run(async () =>
@@ -812,6 +803,8 @@ public class JakesSBSVLC : MonoBehaviour
             _is360 = trackList[0].Data.Video.Projection == VideoProjection.Equirectangular;
 
             Debug.Log($"projection {trackList[0].Data.Video.Projection}");
+
+            // TODO: add SBS / OU / TB filename recognition
 
             if (_is360)
             {
@@ -833,6 +826,13 @@ public class JakesSBSVLC : MonoBehaviour
 
         Play();
 
+        StartCoroutine(SetVideoModeDelayed(1));
+    }
+
+    IEnumerator SetVideoModeDelayed(int secs)
+    {
+        Debug.Log("[JakeDowns] SetVideoModeDelayed " + secs);
+        yield return new WaitForSeconds(secs);
         SetVideoModeMono();
     }
 
@@ -1254,9 +1254,14 @@ public class JakesSBSVLC : MonoBehaviour
         CheckTrialExceeded();
         Debug.Log($"[JakeDowns] set video mode {mode}");
 
-        flipTextureX = false;
+        //flipTextureX = false;
 
         ClearMaterialTextureLinks();
+
+        if(texture == null)
+        {
+            Debug.LogWarning("[SetVideoMode] texture is null!");
+        }
 
         if(mode == VideoMode.Mono || mode == VideoMode._360_2D || mode == VideoMode._180_2D)
         {
@@ -1264,7 +1269,7 @@ public class JakesSBSVLC : MonoBehaviour
             _plane2SphereLeftEye.layer = LayerMask.NameToLayer("Default");
             _plane2SphereRightEye.SetActive(false);
 
-            _morphDisplayLeftRenderer.material = m_lMaterial;
+            _morphDisplayLeftRenderer.material = m_monoMaterial; // m_lMaterial;
             _morphDisplayLeftRenderer.material.mainTexture = texture;
         }
         else
