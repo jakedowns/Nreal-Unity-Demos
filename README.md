@@ -1,4 +1,4 @@
-# VLC3D For Nreal Air - A Simple 3D Video Player
+# into3D Media Player For Nreal
 
 <img width="800" src="https://user-images.githubusercontent.com/1683122/205247852-1e877cd4-386b-4f51-a880-633a44189288.png" />
 
