@@ -54,7 +54,7 @@ public class JakesSBSVLC : MonoBehaviour
     float rightCameraXOnStart;
 
     [SerializeField]
-    public MyIAPHandler myIAPHandler;
+    // public MyIAPHandler myIAPHandler;
 
     GameObject _hideWhenLocked;
     GameObject _lockScreenNotice;
