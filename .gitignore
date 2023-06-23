@@ -160,3 +160,6 @@ Temp
 UserSettings
 .idea
 .vscode
+
+# Document
+**/.obsidian
