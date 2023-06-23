@@ -4,7 +4,6 @@
 OcclusionCullingSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_OcclusionBakeSettings:
     smallestOccluder: 5
     smallestHole: 0.25
     backfaceThreshold: 100
@@ -15981,9 +15980,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 5113664386210071967, guid: c116b7497ab8ca34c9188965d4295e27, type: 3}
-      insertIndex: 2
-      addedObject: {fileID: 1233077429}
-    - targetCorrespondingSourceObject: {fileID: 5113664386210071967, guid: c116b7497ab8ca34c9188965d4295e27, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1233077425}
   m_SourcePrefab: {fileID: 100100000, guid: c116b7497ab8ca34c9188965d4295e27, type: 3}
@@ -16004,14 +16000,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0625980342fb472fa7a2c128fa9793db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!81 &1233077429
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1233077424}
-  m_Enabled: 1
 --- !u!1 &1237906799
 GameObject:
   m_ObjectHideFlags: 0

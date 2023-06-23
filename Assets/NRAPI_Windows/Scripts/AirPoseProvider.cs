@@ -35,7 +35,9 @@ public class AirPoseProvider : BasePoseProvider
         float[] arr = new float[3];
         Marshal.Copy(ptr, arr, 0, 3);
     
-        Quaternion target = Quaternion.Euler(arr[1] - 90.0f, -arr[2], -arr[0]);
+        Quaternion target = Quaternion.Euler(-arr[1] + 90.0f, -arr[2], -arr[0]);
+        // Quaternion target = Quaternion.Euler(arr[1], -arr[2], -arr[0]);
+        // Quaternion target = Quaternion.Euler(45, 0, 0);
         output = new Pose(new Vector3(0, 0, 0), target);
         return true;
     }
