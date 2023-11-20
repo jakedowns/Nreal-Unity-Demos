@@ -16,7 +16,7 @@ public class JakesRemoteController : MonoBehaviour
     GameObject _menuPanel = null;
     GameObject _og_menu = null;
     GameObject _app_menu = null;
-    GameObject _unlock_3d_sphere_mode_prompt_popup = null;
+    // GameObject _unlock_3d_sphere_mode_prompt_popup = null;
     GameObject _menu_toggle_button = null;
     GameObject _options_button = null;
     GameObject _custom_popup = null;
@@ -45,7 +45,7 @@ public class JakesRemoteController : MonoBehaviour
     public enum PopupID
     {
         CUSTOM_AR_POPUP,
-        MODE_LOCKED,
+        // MODE_LOCKED,
         CUSTOM_POPUP,
         PICTURE_SETTINGS_POPUP,
         FILE_FORMAT_POPUP,
@@ -189,7 +189,7 @@ public class JakesRemoteController : MonoBehaviour
         _og_menu = FindGameObjectsAllFirst("BaseButtons");
         _app_menu = FindGameObjectsAllFirst("AppMenu");
 
-        _unlock_3d_sphere_mode_prompt_popup = FindGameObjectsAllFirst("Unlock3DSphereModePopup");
+        // _unlock_3d_sphere_mode_prompt_popup = FindGameObjectsAllFirst("Unlock3DSphereModePopup");
 
         _custom_popup = FindGameObjectsAllFirst("CustomPopup");
         _aspect_popup = FindGameObjectsAllFirst("AspectRatioPopup");
@@ -235,14 +235,14 @@ public class JakesRemoteController : MonoBehaviour
         _app_menu.SetActive(false);
     }
 
-    public void ShowUnlock3DSphereModePropmptPopup()
-    {
-        _unlock_3d_sphere_mode_prompt_popup.SetActive(true);
-
-        stateBeforePopup = new UIStateBeforeCustomPopup(_visible_menu_id);
-
-        HideAllMenus();
-    }
+    // public void ShowUnlock3DSphereModePropmptPopup()
+    // {
+    //     _unlock_3d_sphere_mode_prompt_popup.SetActive(true);
+    //
+    //     stateBeforePopup = new UIStateBeforeCustomPopup(_visible_menu_id);
+    //
+    //     HideAllMenus();
+    // }
 
     public void RestoreStateBeforePopup()
     {
@@ -254,12 +254,12 @@ public class JakesRemoteController : MonoBehaviour
         stateBeforePopup = null;
     }
 
-    public void HideUnlock3DSphereModePropmptPopup()
-    {
-        _unlock_3d_sphere_mode_prompt_popup.SetActive(false);
-
-        RestoreStateBeforePopup();
-    }
+    // public void HideUnlock3DSphereModePropmptPopup()
+    // {
+    //     _unlock_3d_sphere_mode_prompt_popup.SetActive(false);
+    //
+    //     RestoreStateBeforePopup();
+    // }
 
     /*public bool GetTrackpadVisible()
     {
@@ -363,7 +363,7 @@ public class JakesRemoteController : MonoBehaviour
     public void HideAllPopups()
     {
         // TODO: just loop
-        HideUnlock3DSphereModePropmptPopup();
+        // HideUnlock3DSphereModePropmptPopup();
         HideCustomPopup();
         HideCustomARPopup();
         HideDisplayPopup();
@@ -379,9 +379,9 @@ public class JakesRemoteController : MonoBehaviour
 
         switch (popupID)
         {
-            case PopupID.MODE_LOCKED:
-                ShowUnlock3DSphereModePropmptPopup();
-                break;
+            // case PopupID.MODE_LOCKED:
+            //     ShowUnlock3DSphereModePropmptPopup();
+            //     break;
             /*case PopupID.CUSTOM:
                 ShowCustomPopup();
                 break;*/
@@ -395,9 +395,9 @@ public class JakesRemoteController : MonoBehaviour
     {
         switch (popupID)
         {
-            case PopupID.MODE_LOCKED:
-                HideUnlock3DSphereModePropmptPopup();
-                break;
+            // case PopupID.MODE_LOCKED:
+            //     HideUnlock3DSphereModePropmptPopup();
+            //     break;
             /*case PopupID.CUSTOM:
                 HideCustomPopup();
                 break;*/
@@ -517,12 +517,12 @@ public class JakesRemoteController : MonoBehaviour
     }
 
     // Flag UI as unlocked
-    public void Unlock3DMode()
-    {
-        foreach (GameObject button in FindGameObjectsAll("Unlock3603D"))
-        {
-            button.GetComponent<Button>().interactable = false;
-            button.transform.Find("Text").GetComponent<Text>().text = "Unlocked";
-        }
-    }
+    // public void Unlock3DMode()
+    // {
+    //     foreach (GameObject button in FindGameObjectsAll("Unlock3603D"))
+    //     {
+    //         button.GetComponent<Button>().interactable = false;
+    //         button.transform.Find("Text").GetComponent<Text>().text = "Unlocked";
+    //     }
+    // }
 }

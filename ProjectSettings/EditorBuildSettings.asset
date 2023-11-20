@@ -8,4 +8,5 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/JakeDowns/Scenes/VLC3D.unity
     guid: b086cec284c7832438aa6c6aa7656481
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: cbe64ba4930602d4f99ca092ed233345, type: 2}

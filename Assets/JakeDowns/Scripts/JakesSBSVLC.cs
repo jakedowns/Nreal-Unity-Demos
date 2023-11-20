@@ -54,7 +54,7 @@ public class JakesSBSVLC : MonoBehaviour
     float rightCameraXOnStart;
 
     [SerializeField]
-    public MyIAPHandler myIAPHandler;
+    // public MyIAPHandler myIAPHandler;
 
     GameObject _hideWhenLocked;
     GameObject _lockScreenNotice;
@@ -776,7 +776,7 @@ public class JakesSBSVLC : MonoBehaviour
     }
 
     //Public functions that expose VLC MediaPlayer functions in a Unity-friendly way. You may want to add more of these.
-        #region vlc
+    #region vlc
     public void Open(string path)
     {
         Log("VLCPlayerExample Open " + path);
@@ -1215,14 +1215,14 @@ public class JakesSBSVLC : MonoBehaviour
             )
         )   
         {
-            if (trialExceeded)
-            {
-                jakesRemoteController.ShowUnlock3DSphereModePropmptPopup();
-                _videoMode = VideoMode.SBSHalf;
-                Debug.Log("CheckTrialExceeded PAUSE!!!");
-                Pause();
-            } 
-            else
+            // if (trialExceeded)
+            // {
+            //     jakesRemoteController.ShowUnlock3DSphereModePropmptPopup();
+            //     _videoMode = VideoMode.SBSHalf;
+            //     Debug.Log("CheckTrialExceeded PAUSE!!!");
+            //     Pause();
+            // } 
+            // else
             {
                 if(_3DTrialPlaybackStartedAt == 0 && mediaPlayer.IsPlaying){
                     _3DTrialPlaybackStartedAt = cur_time;
@@ -1333,8 +1333,8 @@ public class JakesSBSVLC : MonoBehaviour
         // Use MIMEs on Android
         string[] fileTypes = new string[] { "video/*" };
 #else
-		// Use UTIs on iOS
-		string[] fileTypes = new string[] { "public.movie" };
+        // Use UTIs on iOS
+        string[] fileTypes = new string[] { "public.mp4", "public.movie" };
 #endif
         
         // Pick image(s) and/or video(s)
@@ -1513,10 +1513,10 @@ public class JakesSBSVLC : MonoBehaviour
         if (logToConsole)
             Debug.Log($"[VLC] {message}");
     }
-#endregion
+    #endregion
 
-    public void Unlock3DMode()
-    {
-        _3DModeLocked = false;
-    }
+    // public void Unlock3DMode()
+    // {
+    //     _3DModeLocked = false;
+    // }
 }
